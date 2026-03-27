@@ -121,10 +121,10 @@ Public sanitized copy of claude-config. If the directory exists, changed files a
    PATTERNS_FILE="$CONFIG/sanitize-patterns.conf"
    ```
    Read non-comment, non-directive lines from the patterns file. For each pattern, run `grep -rl` across the forge repo and `sed -i` to replace matches:
-   - Private project names (from patterns file) → replace with `<private-project>`
-   - Your username → `youruser`
-   - Your home path → `$HOME`
-   - Your email → `you@example.com`
+   - Private project names (my-project, my-project, etc.) → replace with `<private-project>`
+   - `youruser` → `youruser`
+   - `$HOME` or `$HOME` → `$HOME`
+   - `you@` → `you@`
    - API key patterns → `<redacted>`
 
    **Do NOT sanitize:** `sanitize-patterns.conf` itself (it's the reference), `.git/`, binary files.
@@ -132,9 +132,9 @@ Public sanitized copy of claude-config. If the directory exists, changed files a
    **Important:** Only sanitize simple string patterns (project names, usernames, paths). Skip regex-heavy patterns (API keys, connection strings) — those won't appear in config files and sed can't handle them reliably. Focus on these specific replacements:
    ```bash
    # In all .md, .sh, .json files under $FORGE (excluding .git and sanitize-patterns.conf):
-   sed -i 's|<your-username>|youruser|g'
-   sed -i 's|/home/youruser|$HOME|g'  # after username replacement
-   sed -i 's|/Users/youruser|$HOME|g'
+   sed -i 's|youruser|youruser|g'
+   sed -i 's|$HOME|$HOME|g'  # after youruser replacement
+   sed -i 's|$HOME|$HOME|g'
    sed -i 's|<your-email>|you@example.com|g'
    # For each private project name from patterns file:
    sed -i 's|<project-name>|my-project|g'

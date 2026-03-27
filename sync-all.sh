@@ -16,7 +16,7 @@ BASE="$HOME/code/github"
 CONFIG_REPO="$SCRIPT_DIR"
 
 # GitHub username — used to detect repo ownership (only push to repos we own)
-GITHUB_USER="your-github-username"
+GITHUB_USER="youruser"
 
 # Auto-discover git repos in BASE (top-level only, excluding claude-config itself)
 PROJECTS=()
@@ -74,7 +74,7 @@ git_update() {
     git commit -m "$(cat <<EOF
 $MSG
 
-Co-Authored-By: Your Name <your@email.com>
+Co-Authored-By: naveed.ahmed <5332157+you@users.noreply.github.com>
 Co-Authored-By: Claude <noreply@anthropic.com>
 EOF
 )" 2>/dev/null

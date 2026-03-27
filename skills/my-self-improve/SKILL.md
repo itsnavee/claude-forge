@@ -40,7 +40,7 @@ find ~/.claude/projects/ -name "*.jsonl" -not -path "*subagent*" 2>/dev/null
 ```
 
 For each JSONL file:
-1. Extract the project name from the directory path (reverse the encoding: last segment after `-Users-username-code-github-` or `-Users-username-data-code-github-`)
+1. Extract the project name from the directory path (reverse the encoding: last segment after `-Users-youruser-code-github-` or `-Users-youruser-data-code-github-`)
 2. Get the file's modification time
 3. If no args (current project mode), skip files not matching the current project
 4. If not `alltime` mode, skip files whose mtime is older than the project's last-processed timestamp

@@ -44,9 +44,9 @@ git ls-files
 For each pattern, grep across all tracked files. Report:
 
 ```
-VIOLATION: pattern "my-secret-project" found in:
-  skills/my-save/SKILL.md:115  — `my-secret-project`, `claude-forge`, `claude-config`
-  hooks/session-summary.sh:25  — SKIP_REPOS=("claude-config" "my-secret-project")
+VIOLATION: pattern "my-project" found in:
+  skills/my-save/SKILL.md:115  — `my-project`, `claude-forge`, `claude-config`
+  hooks/session-summary.sh:25  — SKIP_REPOS=("claude-config" "my-project" "my-project" "my-project" "my-project")
 ```
 
 Skip binary files. Skip `.git/`.
@@ -54,7 +54,7 @@ Skip binary files. Skip `.git/`.
 ### What to skip (false positives)
 
 - `sanitize-patterns.conf` itself (it contains the patterns by definition)
-- Lines that are comments explaining the pattern (e.g., `# my-secret-project is private`)
+- Lines that are comments explaining the pattern (e.g., `# my-project is a private project`)
 - The `my-sanitize` skill file itself
 
 ## Step 4 — Fix (if `fix` argument)
@@ -62,7 +62,7 @@ Skip binary files. Skip `.git/`.
 For each violation, apply a replacement:
 
 **Project names** → replace with generic: `my-project`, `my-store`, `my-app`, `my-infra`
-**Personal paths** → replace `/Users/username/` with `~/`, `/home/username/` with `~/`
+**Personal paths** → replace `$HOME/` with `~/`, `$HOME/` with `~/`
 **Email addresses** → replace with `your@email.com`
 **Usernames** → replace with `your-username`
 
@@ -83,7 +83,7 @@ Sanitize Complete
 
 ## Gotchas
 
-- Pattern matching is case-insensitive by default — a pattern `my-project` catches `My-Project` too
+- Pattern matching is case-insensitive by default — a pattern `my-project` catches `SpeakLaunch` too
 - The fix step uses generic placeholders — review the diff to ensure context still makes sense
 - Binary files are skipped — check images/PDFs manually if they might contain text
 - The `sanitize-patterns.conf` file itself is excluded from scanning (it defines the patterns)

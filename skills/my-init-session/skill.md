@@ -98,7 +98,7 @@ Each completed feature: git commit + update features.json.
 
 ## Gotchas
 
-- Don't run this on the second-brain repo — it's not an implementation project
+- Don't run this on the my-project repo — it's not an implementation project
 - features.json should have 3-8 features max — if more, the scope is too large for one session
 - Environment checks may fail on first run (missing deps, Docker not started) — report and let user fix
 - state.md must exist — if it doesn't, suggest running /my-save first to create it

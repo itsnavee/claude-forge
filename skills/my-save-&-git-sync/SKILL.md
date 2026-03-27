@@ -9,8 +9,8 @@ allowed-tools: Bash(git:*), Bash(gh:*), Read, Glob, Grep, Edit, Write
 
 Run two skills in series without modifying either:
 
-1. Read `~/.claude/skills/my-save/SKILL.md` and follow all its instructions completely. Pass any user-provided arguments as optional notes.
-2. Once fully done, read `~/.claude/skills/my-git-sync/SKILL.md` and follow all its instructions completely. Pass any user-provided arguments as optional commit message context.
+1. Read `$HOME/.claude/skills/my-save/SKILL.md` and follow all its instructions completely. Pass any user-provided arguments as optional notes.
+2. Once fully done, read `$HOME/.claude/skills/my-git-sync/SKILL.md` and follow all its instructions completely. Pass any user-provided arguments as optional commit message context.
 
 ## Gotchas
 

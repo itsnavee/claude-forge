@@ -174,7 +174,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "~/.claude/statusline-mini.sh"
+    "command": "~/.claude/statusline.sh"
   },
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true,

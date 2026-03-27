@@ -8,12 +8,12 @@ argument-hint: "< path to results | cached batch >"
 
 # /my-write-research-entries — Research Entry Writer
 
-Takes classified `research-result` JSON and writes entries to the correct destination files in second-brain. Handles dedup, GitHub markdown formatting, article saving, and mapping updates.
+Takes classified `research-result` JSON and writes entries to the correct destination files in my-project. Handles dedup, GitHub markdown formatting, article saving, and mapping updates.
 
 ## Prerequisites
 
 - Classified results (from /my-classify-content or /my-research-targets)
-- Working directory or explicit path to `~/code/github/second-brain/`
+- Working directory or explicit path to `~/code/github/my-project/`
 
 ## Usage
 

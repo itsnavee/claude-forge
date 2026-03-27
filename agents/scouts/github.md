@@ -108,7 +108,7 @@ End your response with a JSON code block tagged `research-result`:
   "views": null,
   "improvements": [
     {
-      "target": "my-app|my-api|my-frontend|my-infra|boilerplate-webapp|cli-coding-setup",
+      "target": "my-project|my-project|my-project|my-project|my-project|boilerplate-webapp|my-project|cli-coding-setup",
       "title": "Descriptive title",
       "gap": "Specific gap addressed",
       "insight": "Why it matters, 2-4 sentences",
@@ -129,7 +129,7 @@ End your response with a JSON code block tagged `research-result`:
   "side_income": [],
   "content_ideas": [],
   "article": null,
-  "affected": ["my-app", "agent-architecture"],
+  "affected": ["my-project", "agent-architecture"],
   "repo_summary": {
     "key_features": ["feature 1", "feature 2"],
     "architecture": "Single Go binary + Redis. Agents = Python workers.",
@@ -143,7 +143,7 @@ End your response with a JSON code block tagged `research-result`:
 
 **Note:** GitHub repos do NOT get saved as articles (`article: null`). They go to global mapping only.
 
-**Repo summary:** The `repo_summary` field is written by the main agent to `~/code/github/second-brain/research/repos.md` — a persistent registry of all researched repos with enough detail to avoid re-fetching. Always populate this field for repos with status `researched`.
+**Repo summary:** The `repo_summary` field is written by the main agent to `~/code/github/my-project/research/repos.md` — a persistent registry of all researched repos with enough detail to avoid re-fetching. Always populate this field for repos with status `researched`.
 
 **Fallback:** If you cannot produce JSON, describe findings in prose with clear section headings. Main agent will extract.
 

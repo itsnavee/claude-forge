@@ -1,6 +1,6 @@
 ---
-name: my-second-brain-find-potential-improvements
-description: Use when you want to find improvements for a project from research — cross-references project gaps with saved articles in second-brain, filters against existing implementations, and writes actionable entries to improvements/ files. Also use for "find improvements", "what can we adopt", or "check research for ideas".
+name: my-my-project-find-potential-improvements
+description: Use when you want to find improvements for a project from research — cross-references project gaps with saved articles in my-project, filters against existing implementations, and writes actionable entries to improvements/ files. Also use for "find improvements", "what can we adopt", or "check research for ideas".
 argument-hint: "< project name | focus area | (no arg: current project) >"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent, Skill(git-push)
 ---
@@ -12,7 +12,7 @@ Scan articles, cross-reference with project gaps, check what's already implement
 ## Constants
 
 ```
-SECOND_BRAIN=~/code/github/second-brain
+SECOND_BRAIN=~/code/github/my-project
 PROJECTS_DIR=$SECOND_BRAIN/projects
 IMPROVEMENTS_DIR=$SECOND_BRAIN/improvements
 ARTICLES_DIR=$SECOND_BRAIN/research/read-next
@@ -26,8 +26,8 @@ TODAY=<YYYY-MM-DD from current date>
 
 Detect where the skill was invoked from:
 
-- **From a project root** (cwd is a git repo under `$CODE_DIR` that is NOT `second-brain`): Single-project mode. Only process that project.
-- **From `$SECOND_BRAIN`**: Multi-project mode. Scan all git repos in `$CODE_DIR/` (run `ls` then filter to directories containing `.git/`). Exclude `second-brain`, `claude-config`, and any non-project repos (no matching file in `$PROJECTS_DIR/`).
+- **From a project root** (cwd is a git repo under `$CODE_DIR` that is NOT `my-project`): Single-project mode. Only process that project.
+- **From `$SECOND_BRAIN`**: Multi-project mode. Scan all git repos in `$CODE_DIR/` (run `ls` then filter to directories containing `.git/`). Exclude `my-project`, `claude-config`, and any non-project repos (no matching file in `$PROJECTS_DIR/`).
 - **From anywhere else**: Ask the user which project(s) to scan.
 
 Store the list of `target_projects` — each entry is `{ name, repo_path, project_file, improvements_file }`.
@@ -37,7 +37,7 @@ Store the list of `target_projects` — each entry is `{ name, repo_path, projec
 ## Step 1: Pull Latest Second-Brain
 
 ```bash
-cd ~/code/github/second-brain && git pull --rebase origin main
+cd ~/code/github/my-project && git pull --rebase origin main
 ```
 
 If uncommitted changes, stash → pull → pop. If network fails, warn but continue.
@@ -137,13 +137,13 @@ For each ADD or MERGE suggestion, edit the target implementation doc in the proj
 - **Match the doc's style** — if the doc uses numbered steps, add a numbered step. If it uses checkboxes, add a checkbox. If it uses tables, add a row.
 - **Mark as AI-suggested** — prefix with `[ ]` checkbox if the doc uses them, or add `<!-- from: article-filename.md -->` comment so the source is traceable
 - **For MERGE**: enhance the existing content rather than duplicating. Add the new insight/action inline where the partial coverage exists.
-- **Keep it concise** — the implementation doc should have the actionable task, not the full analysis. The full analysis lives in the second-brain improvements file.
+- **Keep it concise** — the implementation doc should have the actionable task, not the full analysis. The full analysis lives in the my-project improvements file.
 
 ### If no clear target doc exists:
 - Check for `docs/implementation/`, `docs/build-plans/`, `docs/plan/`, `docs/planning/` directories
 - If a gaps/roadmap file exists (`GAPS-AND-ROADMAP.md`, `roadmap.md`), use that
 - Last resort: append to `docs/key-decisions.md` under a "Pending Improvements" heading
-- Never create new files — if no suitable doc exists, only write to second-brain
+- Never create new files — if no suitable doc exists, only write to my-project
 
 ---
 
@@ -200,14 +200,14 @@ For each project repo that was modified, `cd` to it and invoke `/git-push`. Comm
 - **Be specific** — "add tests" is not a suggestion; "use Vitest with the patterns from `<article>` to test the workflow engine" is
 - **Respect what exists** — if the project already does something better, skip the suggestion and record why
 - **Edit, don't dump** — implementation doc edits should feel like they were written by someone who read the doc, not appended by a bot
-- **No new files in project repos** — only edit existing docs. New suggestions without a home go to second-brain only
+- **No new files in project repos** — only edit existing docs. New suggestions without a home go to my-project only
 - **Trace everything** — every incorporated suggestion links back to its source article
 
 ## Quick Help
 
-**What**: Cross-references second-brain articles against project gaps, filters out already-implemented items, and writes actionable improvements into project docs.
+**What**: Cross-references my-project articles against project gaps, filters out already-implemented items, and writes actionable improvements into project docs.
 **Usage**:
 - Run from a **project root** — scans articles relevant to that project
-- Run from **second-brain root** — scans all active projects
+- Run from **my-project root** — scans all active projects
 **Output**: Edits project implementation docs (ADD/MERGE suggestions) and writes analysis to `improvements/<project>.md`.
 **Skips**: Archived projects, already-implemented suggestions.

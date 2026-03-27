@@ -448,8 +448,8 @@ if [ "$plugin_fixed" -eq 0 ]; then
 fi
 
 # Generate ROUTING.md from installed skills/agents/plugins
-if [ -f "$REPO/scripts/generate-routing.sh" ]; then
-  bash "$REPO/scripts/generate-routing.sh" 2>/dev/null
+if [ -f "$SCRIPT_DIR/scripts/generate-routing.sh" ]; then
+  bash "$SCRIPT_DIR/scripts/generate-routing.sh" 2>/dev/null
 fi
 
 printf "\n${DIM}──────────────────────────────────────────${RESET}\n"

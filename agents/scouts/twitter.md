@@ -134,7 +134,7 @@ End your response with a JSON code block tagged `research-result`:
   "views": 123456,
   "improvements": [
     {
-      "target": "my-app|my-api|my-frontend|my-infra|boilerplate-webapp|cli-coding-setup",
+      "target": "my-project|my-project|my-project|my-project|my-project|boilerplate-webapp|my-project|cli-coding-setup",
       "title": "Descriptive title",
       "gap": "Specific gap addressed",
       "insight": "Why it matters, 2-4 sentences",
@@ -159,7 +159,7 @@ End your response with a JSON code block tagged `research-result`:
     "slug": "4-8-kebab-case-words",
     "content": "Full article markdown with frontmatter"
   },
-  "affected": ["my-app", "agent-architecture"]
+  "affected": ["my-project", "agent-architecture"]
 }
 ```
 ~~~

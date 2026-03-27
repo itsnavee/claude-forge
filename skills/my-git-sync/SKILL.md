@@ -26,18 +26,32 @@ Run `git status` (never `-uall`) and `git diff --stat` to understand what change
 Add relevant files by name (NEVER `git add .` or `git add -A`). Never stage `.env`, credentials, secrets, `node_modules/`, `dist/`, `build/`, `.next/`, or other build artifacts. Warn if any are present.
 
 ### 3. Commit
-Draft a concise commit message (1-2 sentences, "why" not "what"). If the user passed arguments, use them as the message or context. Always end with co-author lines:
+Draft a concise commit message (1-2 sentences, "why" not "what"). If the user passed arguments, use them as the message or context.
+
+**Co-author lines depend on repo visibility.** Before committing, check if the repo is public:
+```bash
+source ~/.claude/hooks/is-public-repo.sh
 ```
-Co-Authored-By: Your Name <your@email.com>
+
+- **Public repos** (`IS_PUBLIC_REPO=yes`):
+```
+Co-Authored-By: naveed.ahmed <5332157+you@users.noreply.github.com>
 Co-Authored-By: Claude <noreply@anthropic.com>
 ```
-Use a HEREDOC for the message:
+
+- **Private repos** (`IS_PUBLIC_REPO=no`):
+```
+Co-Authored-By: naveed.ahmed <5332157+you@users.noreply.github.com>
+Co-Authored-By: example.com <247807559+yourorg-admin@users.noreply.github.com>
+```
+
+Use a HEREDOC for the message (example for private repo):
 ```bash
 git commit -m "$(cat <<'EOF'
 message here
 
-Co-Authored-By: Your Name <your@email.com>
-Co-Authored-By: Claude <noreply@anthropic.com>
+Co-Authored-By: naveed.ahmed <5332157+you@users.noreply.github.com>
+Co-Authored-By: example.com <247807559+yourorg-admin@users.noreply.github.com>
 EOF
 )"
 ```
@@ -68,8 +82,7 @@ Only if the user passed `pr` or `pr: <title>`:
    ## Test plan
    - [ ] ...
 
-   Co-Authored-By: Your Name <your@email.com>
-   Co-Authored-By: Claude <noreply@anthropic.com>
+   Use the same public/private co-author logic as commits (step 3).
    EOF
    )"
    ```

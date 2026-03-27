@@ -150,8 +150,8 @@ claude-forge/
 │   ├── my-research-targets/        #   Research URLs for improvements
 │   ├── my-classify-content/        #   Classify content against projects
 │   ├── my-write-research-entries/  #   Write research to knowledge base
-│   ├── my-second-brain-find-potential-improvements/
-│   ├── my-project-to-brain-sync/   #   Export project state to second-brain
+│   ├── my-my-project-find-potential-improvements/
+│   ├── my-project-to-brain-sync/   #   Export project state to my-project
 │   ├── my-claude-config-sync/      #   Sync configs between machines
 │   ├── my-sync-all/                #   Pull all repos + config sync
 │   ├── my-update-boilerplate-webapp/  #   Sync components to template repo
@@ -313,8 +313,8 @@ The `CLAUDE.md` also enforces:
 | `/my-classify-content` | Classify fetched content | Produces structured research-result JSON against active projects, topics, opportunities |
 | `/my-research-targets` | Research a list of URLs | Batch process URLs (repos, tweets, articles). Dispatches parallel subagents, writes to knowledge base |
 | `/my-write-research-entries` | Write classified results to files | Handles dedup, formatting, mapping updates for improvements/, topics/, drafts/ |
-| `/my-second-brain-find-potential-improvements` | Find improvements from research | Cross-references project gaps with saved articles, filters against existing implementations |
-| `/my-project-to-brain-sync` | Export project state to knowledge base | Updates `second-brain/projects/<name>.md` with current architecture, decisions, status |
+| `/my-my-project-find-potential-improvements` | Find improvements from research | Cross-references project gaps with saved articles, filters against existing implementations |
+| `/my-project-to-brain-sync` | Export project state to knowledge base | Updates `my-project/projects/<name>.md` with current architecture, decisions, status |
 
 ### Meta & Infrastructure
 
@@ -580,10 +580,10 @@ otus remove-machine dev          # Unregister
 
 #### Sample Project Config
 
-Drop this at `infra/configs/otus.conf` in your project root. Here's a real example from your project:
+Drop this at `infra/configs/otus.conf` in your project root. Here's a real example from [my-project](https://github.com/itsnavee/my-project):
 
 ```bash
-# infra/configs/otus.conf — Example Project
+# infra/configs/otus.conf — LocusGraph
 PROJECT_NAME="my-project"
 CONTAINER_PREFIX="lg"
 DNS_DOMAIN="my-project.dev"
