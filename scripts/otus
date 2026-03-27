@@ -1,0 +1,878 @@
+#!/usr/bin/env bash
+# otus — Unified project CLI (docker, test, dns, machines)
+# Finds nearest infra/configs/otus.conf, sources project config, runs commands.
+# Install: ln -sf ~/code/github/claude-config/scripts/otus ~/bin/otus
+#
+# Cross-platform: Linux + macOS
+# Shell completions: eval "$(otus --completions)"
+
+set -euo pipefail
+
+OTUS_VERSION="1.0.0"
+
+# --- Cross-platform helpers ---
+
+_hostname_short() {
+  hostname -s 2>/dev/null || hostname | sed 's/\..*//'
+}
+
+_stat_mtime() {
+  # Returns modification time as epoch seconds
+  if stat --version &>/dev/null 2>&1; then
+    stat -c %Y "$1" 2>/dev/null  # GNU/Linux
+  else
+    stat -f %m "$1" 2>/dev/null  # BSD/macOS
+  fi
+}
+
+# --- Find project root by walking up from PWD ---
+
+find_project_root() {
+  local dir="$PWD"
+  while [[ "$dir" != "/" ]]; do
+    # Check for otus.conf first, fall back to dctl.conf for migration
+    if [[ -f "$dir/infra/configs/otus.conf" ]]; then
+      echo "$dir"
+      return 0
+    fi
+    if [[ -f "$dir/infra/configs/dctl.conf" ]]; then
+      echo "$dir"
+      return 0
+    fi
+    dir="$(dirname "$dir")"
+  done
+  return 1
+}
+
+PROJECT_ROOT="$(find_project_root 2>/dev/null || true)"
+if [[ -z "$PROJECT_ROOT" ]]; then
+  # Allow version/help without project context
+  case "${1:-}" in
+    --version|-v) echo "otus $OTUS_VERSION"; exit 0 ;;
+    --help|-h)    echo "otus $OTUS_VERSION — run from inside a project with infra/configs/otus.conf"; exit 0 ;;
+  esac
+  echo "ERROR: no infra/configs/otus.conf found in any parent directory"
+  echo "Run from inside a project with infra/configs/otus.conf"
+  exit 1
+fi
+
+INFRA_DIR="$PROJECT_ROOT/infra"
+HOSTNAME_SHORT="$(_hostname_short)"
+
+# --- Source project config ---
+
+# Defaults (project config can override)
+PROJECT_NAME=""
+CONTAINER_PREFIX=""
+DNS_DOMAIN=""
+declare -A COMPOSE_FILES=()
+declare -A SVC_GROUPS=()
+declare -A GROUP_DEPS=()
+AUX_STACKS=()
+STG_ONLY_GROUPS=""
+INIT_CONTAINERS=""
+ALL_GROUPS=""
+
+# Test config defaults
+TEST_BACKEND_CMD=""
+TEST_FRONTEND_APPS=()
+TEST_E2E_CMD=""
+
+# Source otus.conf or dctl.conf (backward compatible)
+if [[ -f "$INFRA_DIR/configs/otus.conf" ]]; then
+  # shellcheck source=/dev/null
+  source "$INFRA_DIR/configs/otus.conf"
+elif [[ -f "$INFRA_DIR/configs/dctl.conf" ]]; then
+  # shellcheck source=/dev/null
+  source "$INFRA_DIR/configs/dctl.conf"
+fi
+
+MACHINES_FILE="$INFRA_DIR/machines.json"
+
+# Auto-discover apps if apps/ exists
+APPS_DIR="$PROJECT_ROOT/apps"
+AVAILABLE_APPS=()
+if [[ -d "$APPS_DIR" ]]; then
+  for d in "$APPS_DIR"/*/; do
+    [[ -d "$d" ]] && AVAILABLE_APPS+=("$(basename "$d")")
+  done
+fi
+
+# ═══════════════════════════════════════════════════════════════════════
+# DOCKER MODULE
+# ═══════════════════════════════════════════════════════════════════════
+
+detect_env() {
+  [[ ! -f "$MACHINES_FILE" ]] && return 1
+  command -v python3 &>/dev/null || return 1
+  python3 -c "
+import json
+m = json.load(open('$MACHINES_FILE'))
+for env, cfg in m.get('environments', {}).items():
+    if '$HOSTNAME_SHORT' in cfg.get('machines', []):
+        print(env)
+        break
+" 2>/dev/null
+}
+
+validate_host() {
+  local env="$1"
+  [[ ! -f "$MACHINES_FILE" ]] && return 0
+  command -v python3 &>/dev/null || return 0
+  local allowed
+  allowed=$(python3 -c "
+import json
+m = json.load(open('$MACHINES_FILE'))
+hosts = m.get('environments', {}).get('$env', {}).get('machines', [])
+print(' '.join(hosts))
+" 2>/dev/null) || return 0
+  [[ -z "$allowed" ]] && return 0
+  for h in $allowed; do
+    [[ "$HOSTNAME_SHORT" == "$h" ]] && return 0
+  done
+  echo "ERROR: env '$env' is assigned to [$allowed], but this host is '$HOSTNAME_SHORT'"
+  exit 1
+}
+
+run_dc() {
+  local file="$1" cmd="$2" flag_build="$3" flag_no_cache="$4"
+  shift 4
+  local dc="docker compose -f $file"
+  case "$cmd" in
+    status)             $dc ps "$@" ;;
+    up)
+      local up_args=(-d)
+      [[ "$flag_build" == "1" ]] && up_args+=(--build)
+      [[ "$flag_no_cache" == "1" ]] && $dc build --no-cache "$@"
+      $dc up "${up_args[@]}" "$@"
+      ;;
+    build)
+      local build_args=()
+      [[ "$flag_no_cache" == "1" ]] && build_args+=(--no-cache)
+      $dc build "${build_args[@]}" "$@"
+      ;;
+    stop)               $dc stop "$@" ;;
+    down)               $dc down "$@" ;;
+    destroy-containers) $dc down --remove-orphans "$@" ;;
+    destroy-volumes)    $dc down -v "$@" ;;
+    destroy-images)     $dc down --rmi all "$@" ;;
+    destroy-all)        $dc down -v --rmi all --remove-orphans "$@" ;;
+    restart)            $dc restart "$@" ;;
+    logs)               $dc logs -f --tail=100 "$@" ;;
+  esac
+}
+
+is_docker_command() {
+  case "$1" in
+    status|up|build|stop|down|destroy-containers|destroy-volumes|destroy-images|destroy-all|restart|logs) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+is_env() { [[ -n "${COMPOSE_FILES[$1]:-}" ]]; }
+
+is_group() {
+  for g in $ALL_GROUPS; do [[ "$1" == "$g" ]] && return 0; done
+  return 1
+}
+
+is_stg_only_group() {
+  for s in $STG_ONLY_GROUPS; do [[ "$1" == "$s" ]] && return 0; done
+  return 1
+}
+
+resolve_group_services() {
+  local group="$1" env="$2"
+  local -A seen=()
+  local queue=("$group")
+  local services=""
+  while [[ ${#queue[@]} -gt 0 ]]; do
+    local current="${queue[0]}"
+    queue=("${queue[@]:1}")
+    [[ -n "${seen[$current]:-}" ]] && continue
+    seen[$current]=1
+    [[ "$env" == "dev" ]] && is_stg_only_group "$current" && continue
+    local gs="${SVC_GROUPS[$current]:-}"
+    [[ -n "$gs" ]] && services="$services $gs"
+    for dep in ${GROUP_DEPS[$current]:-}; do
+      [[ -z "${seen[$dep]:-}" ]] && queue+=("$dep")
+    done
+  done
+  echo "$services"
+}
+
+# --- List command ---
+
+cmd_list() {
+  local main_env
+  main_env=$(detect_env 2>/dev/null || true)
+
+  local c_green="" c_dim="" c_bold="" c_reset="" c_cyan=""
+  if [[ -t 1 ]]; then
+    c_green="\033[32m"; c_dim="\033[2m"; c_bold="\033[1m"; c_reset="\033[0m"; c_cyan="\033[36m"
+  fi
+
+  printf "${c_bold}${c_cyan}${PROJECT_NAME:-otus}${c_reset} ${c_dim}(${PROJECT_ROOT})${c_reset}\n"
+  printf "${c_bold}%-7s  %-12s  %-18s  %-10s  %s${c_reset}\n" "STACK" "GROUP" "SERVICE" "STATUS" "PORT"
+  printf "${c_dim}%-7s  %-12s  %-18s  %-10s  %s${c_reset}\n" "──────" "────────────" "──────────────────" "──────────" "──────"
+
+  local ordered_stacks=()
+  if [[ -n "$main_env" ]]; then ordered_stacks+=("$main_env"); else ordered_stacks+=(stg dev); fi
+  for aux in "${AUX_STACKS[@]}"; do ordered_stacks+=("$aux"); done
+
+  for stack in "${ordered_stacks[@]}"; do
+    [[ -z "${COMPOSE_FILES[$stack]:-}" ]] && continue
+    local file="${COMPOSE_FILES[$stack]}"
+    [[ ! -f "$file" ]] && continue
+
+    local all_services
+    all_services=$(docker compose -f "$file" config --services 2>/dev/null || true)
+    [[ -z "$all_services" ]] && continue
+
+    local running_json
+    running_json=$(docker compose -f "$file" ps --format json 2>/dev/null || true)
+
+    local -A running_map=()
+    if [[ -n "$running_json" ]]; then
+      while IFS= read -r line; do
+        [[ -z "$line" ]] && continue
+        local sn ss
+        sn=$(echo "$line" | python3 -c "import sys,json; print(json.load(sys.stdin).get('Service',''))" 2>/dev/null || true)
+        ss=$(echo "$line" | python3 -c "import sys,json; print(json.load(sys.stdin).get('State',''))" 2>/dev/null || true)
+        [[ -n "$sn" ]] && running_map[$sn]="$ss"
+      done <<< "$running_json"
+    fi
+
+    local ports_json
+    ports_json=$(docker compose -f "$file" config --format json 2>/dev/null || true)
+
+    local -A svc_available=()
+    for svc in $all_services; do svc_available[$svc]=1; done
+
+    local -A printed=()
+    for g in $ALL_GROUPS; do
+      for svc in ${SVC_GROUPS[$g]:-}; do
+        [[ -z "${svc_available[$svc]:-}" ]] && continue
+        local skip=false
+        for init in $INIT_CONTAINERS; do [[ "$svc" == "$init" ]] && skip=true; done
+        $skip && continue
+        [[ -n "${printed[$svc]:-}" ]] && continue
+        printed[$svc]=1
+
+        local st="${running_map[$svc]:-stopped}"
+        local sd
+        [[ "$st" == "running" ]] && sd="${c_green}running${c_reset}" || sd="${c_dim}${st}${c_reset}"
+
+        local port="—"
+        if [[ -n "$ports_json" ]]; then
+          local extracted
+          extracted=$(echo "$ports_json" | python3 -c "
+import sys, json
+cfg = json.load(sys.stdin)
+svc = cfg.get('services', {}).get('$svc', {})
+for p in svc.get('ports', []):
+    if isinstance(p, dict) and p.get('published'):
+        print(':' + str(p['published'])); break
+    elif isinstance(p, str) and ':' in p:
+        parts = p.split(':')
+        print(':' + parts[-2] if len(parts) >= 2 else ':' + parts[0]); break
+" 2>/dev/null || true)
+          [[ -n "$extracted" ]] && port="$extracted"
+        fi
+        printf "%-7s  %-12s  %-18s  %-10b  %s\n" "$stack" "$g" "$svc" "$sd" "$port"
+      done
+    done
+  done
+}
+
+# --- Explore command ---
+
+cmd_explore() {
+  local c_green="" c_red="" c_dim="" c_bold="" c_reset="" c_cyan="" c_yellow=""
+  if [[ -t 1 ]]; then
+    c_green="\033[32m"; c_red="\033[31m"; c_dim="\033[2m"
+    c_bold="\033[1m"; c_reset="\033[0m"; c_cyan="\033[36m"; c_yellow="\033[33m"
+  fi
+
+  local main_env
+  main_env=$(detect_env 2>/dev/null || true)
+
+  local -a scan_stacks=()
+  for stack in "${!COMPOSE_FILES[@]}"; do
+    [[ -f "${COMPOSE_FILES[$stack]}" ]] && scan_stacks+=("$stack")
+  done
+
+  printf "\n${c_bold}${c_cyan}OTUS EXPLORE — ${PROJECT_NAME:-project}${c_reset}\n"
+  printf "${c_dim}Root: %s  Host: %s  Env: %s${c_reset}\n\n" "$PROJECT_ROOT" "$HOSTNAME_SHORT" "${main_env:-none}"
+
+  printf "${c_bold}CONTAINERS${c_reset}\n"
+  printf "${c_dim}%-7s  %-25s  %-10s  %s${c_reset}\n" "STACK" "CONTAINER" "STATUS" "UPTIME"
+  printf "${c_dim}%-7s  %-25s  %-10s  %s${c_reset}\n" "──────" "─────────────────────────" "──────────" "────────────"
+
+  local found=0
+  for stack in "${scan_stacks[@]}"; do
+    local cjson
+    cjson=$(docker compose -f "${COMPOSE_FILES[$stack]}" ps -a --format json 2>/dev/null || true)
+    [[ -z "$cjson" ]] && continue
+    while IFS= read -r line; do
+      [[ -z "$line" ]] && continue
+      found=1
+      local cn cs cu
+      read -r cn cs cu < <(echo "$line" | python3 -c "
+import sys, json
+c = json.load(sys.stdin)
+print(f\"{c.get('Name','')}\t{c.get('State','')}\t{c.get('Status','')}\")
+" 2>/dev/null || echo "-	-	-")
+      local sd
+      case "$cs" in
+        running) sd="${c_green}running${c_reset}" ;;
+        exited)  sd="${c_red}exited${c_reset}" ;;
+        *)       sd="${c_yellow}${cs}${c_reset}" ;;
+      esac
+      printf "%-7s  %-25s  %-10b  %s\n" "$stack" "$cn" "$sd" "$cu"
+    done <<< "$cjson"
+  done
+  [[ "$found" -eq 0 ]] && printf "  ${c_dim}(none)${c_reset}\n"
+  printf "\n"
+}
+
+# --- Docker dispatch ---
+
+docker_dispatch() {
+  local cmd="$1"; shift
+  local FLAG_BUILD=0 FLAG_NO_CACHE=0
+  local RAW_ARGS=()
+  for arg in "$@"; do
+    case "$arg" in
+      --build)              FLAG_BUILD=1 ;;
+      --no-cache|--nocache) FLAG_NO_CACHE=1 ;;
+      *)                    RAW_ARGS+=("$arg") ;;
+    esac
+  done
+
+  local MAIN_ENV
+  MAIN_ENV=$(detect_env 2>/dev/null || true)
+  if [[ -z "$MAIN_ENV" ]]; then
+    echo "ERROR: host '$HOSTNAME_SHORT' is not mapped to any environment"
+    echo "Run: otus add-machine <env>"
+    exit 1
+  fi
+
+  local MAIN_FILE="${COMPOSE_FILES[$MAIN_ENV]}"
+  validate_host "$MAIN_ENV"
+
+  if [[ ${#RAW_ARGS[@]} -eq 0 ]]; then
+    local STACKS=("$MAIN_ENV")
+    for aux in "${AUX_STACKS[@]}"; do
+      local f="${COMPOSE_FILES[$aux]:-}"
+      [[ -n "$f" && -f "$f" ]] && STACKS+=("$aux")
+    done
+    echo "[$HOSTNAME_SHORT → $MAIN_ENV] $cmd (${STACKS[*]})"
+    for stack in "${STACKS[@]}"; do
+      run_dc "${COMPOSE_FILES[$stack]}" "$cmd" "$FLAG_BUILD" "$FLAG_NO_CACHE"
+    done
+    return
+  fi
+
+  local RESOLVED_SERVICES=()
+  for arg in "${RAW_ARGS[@]}"; do
+    if [[ "$arg" == "opik" ]]; then
+      local opik_f="${COMPOSE_FILES[opik]:-}"
+      if [[ -n "$opik_f" && -f "$opik_f" ]]; then
+        echo "[$HOSTNAME_SHORT] opik → $cmd"
+        run_dc "$opik_f" "$cmd" "$FLAG_BUILD" "$FLAG_NO_CACHE"
+      fi
+      continue
+    fi
+    if is_group "$arg" && [[ -n "${SVC_GROUPS[$arg]:-}" ]]; then
+      if [[ "$cmd" == "up" || "$cmd" == "build" ]]; then
+        for svc in $(resolve_group_services "$arg" "$MAIN_ENV"); do
+          RESOLVED_SERVICES+=("$svc")
+        done
+      else
+        for svc in ${SVC_GROUPS[$arg]}; do
+          [[ "$MAIN_ENV" == "dev" ]] && is_stg_only_group "$arg" && continue
+          RESOLVED_SERVICES+=("$svc")
+        done
+      fi
+    else
+      RESOLVED_SERVICES+=("$arg")
+    fi
+  done
+
+  local -A _seen=()
+  local UNIQUE=()
+  for svc in "${RESOLVED_SERVICES[@]}"; do
+    [[ -z "${_seen[$svc]:-}" ]] && { _seen[$svc]=1; UNIQUE+=("$svc"); }
+  done
+
+  if [[ ${#UNIQUE[@]} -gt 0 ]]; then
+    echo "[$HOSTNAME_SHORT → $MAIN_ENV] $cmd ${UNIQUE[*]}"
+    run_dc "$MAIN_FILE" "$cmd" "$FLAG_BUILD" "$FLAG_NO_CACHE" "${UNIQUE[@]}"
+  fi
+}
+
+# ═══════════════════════════════════════════════════════════════════════
+# TEST MODULE
+# ═══════════════════════════════════════════════════════════════════════
+
+cmd_test() {
+  local target="${1:-all}"
+  shift 2>/dev/null || true
+
+  local coverage=""
+  local extra_args=()
+  for arg in "$@"; do
+    case "$arg" in
+      --coverage|-c) coverage="1" ;;
+      *)             extra_args+=("$arg") ;;
+    esac
+  done
+  # Also check if target was --coverage
+  if [[ "$target" == "--coverage" || "$target" == "-c" ]]; then
+    coverage="1"; target="all"
+  fi
+
+  local c_green="" c_red="" c_bold="" c_reset="" c_cyan="" c_yellow=""
+  if [[ -t 1 ]]; then
+    c_green="\033[32m"; c_red="\033[31m"; c_bold="\033[1m"
+    c_reset="\033[0m"; c_cyan="\033[36m"; c_yellow="\033[33m"
+  fi
+
+  printf "${c_bold}${c_cyan}OTUS TEST — ${PROJECT_NAME:-project}${c_reset}\n"
+  printf "${c_bold}Target:${c_reset} %s" "$target"
+  [[ -n "$coverage" ]] && printf "  ${c_yellow}(with coverage)${c_reset}"
+  printf "\n\n"
+
+  local FAIL=0
+
+  # Detect what test infrastructure exists
+  local has_backend=false has_e2e=false
+  local backend_dir="$PROJECT_ROOT/services/api"
+  [[ ! -d "$backend_dir" ]] && backend_dir="$PROJECT_ROOT/backend"
+  [[ -d "$backend_dir/tests" ]] && has_backend=true
+  [[ -f "$PROJECT_ROOT/playwright.config.ts" ]] && has_e2e=true
+
+  # Detect compose for running tests in containers vs local
+  local use_compose=false compose_file=""
+  local main_env
+  main_env=$(detect_env 2>/dev/null || true)
+  if [[ -n "$main_env" && -n "${COMPOSE_FILES[$main_env]:-}" ]]; then
+    compose_file="${COMPOSE_FILES[$main_env]}"
+    # Check if containers are running
+    if docker compose -f "$compose_file" ps --format json 2>/dev/null | grep -q '"running"'; then
+      use_compose=true
+    fi
+  fi
+
+  run_backend_tests() {
+    printf "\n${c_bold}━━━ Backend (pytest) ━━━${c_reset}\n"
+    local cov_args=""
+    [[ -n "$coverage" ]] && cov_args="--cov=app --cov-report=term-missing --cov-report=html"
+
+    if $use_compose; then
+      local svc_name
+      # Find the backend service name
+      if docker compose -f "$compose_file" config --services 2>/dev/null | grep -q "api"; then
+        svc_name=$(docker compose -f "$compose_file" config --services 2>/dev/null | grep "api" | head -1)
+      elif docker compose -f "$compose_file" config --services 2>/dev/null | grep -q "backend"; then
+        svc_name=$(docker compose -f "$compose_file" config --services 2>/dev/null | grep "backend" | head -1)
+      fi
+      if [[ -n "$svc_name" ]]; then
+        docker compose -f "$compose_file" exec -e AUTH_DISABLED=true "$svc_name" \
+          python -m pytest tests/ -v --tb=short $cov_args "${extra_args[@]}" 2>&1 || return 1
+      else
+        echo "  No api/backend service found in compose"
+        return 1
+      fi
+    else
+      # Run locally
+      (cd "$backend_dir" && python -m pytest tests/ -v --tb=short $cov_args "${extra_args[@]}" 2>&1) || return 1
+    fi
+    printf "${c_green}✓ Backend tests complete${c_reset}\n"
+  }
+
+  run_e2e_tests() {
+    local project="${1:-}"
+    printf "\n${c_bold}━━━ E2E (Playwright)${project:+ — $project} ━━━${c_reset}\n"
+    local pw_args=()
+    [[ -n "$project" ]] && pw_args+=(--project "$project")
+    (cd "$PROJECT_ROOT" && npx playwright test "${pw_args[@]}" "${extra_args[@]}" 2>&1) || return 1
+    printf "${c_green}✓ E2E tests complete${c_reset}\n"
+  }
+
+  run_frontend_tests() {
+    local app_name="$1"
+    local app_dir="$PROJECT_ROOT/apps/$app_name"
+    [[ ! -d "$app_dir" ]] && { echo "  App '$app_name' not found"; return 1; }
+
+    printf "\n${c_bold}━━━ ${app_name} (vitest) ━━━${c_reset}\n"
+
+    if $use_compose; then
+      local svc_name
+      svc_name=$(docker compose -f "$compose_file" config --services 2>/dev/null | grep "$app_name" | head -1 || true)
+      if [[ -n "$svc_name" ]]; then
+        docker compose -f "$compose_file" exec "$svc_name" \
+          npx vitest run --reporter=verbose "${extra_args[@]}" 2>&1 || return 1
+      else
+        (cd "$app_dir" && npx vitest run --reporter=verbose "${extra_args[@]}" 2>&1) || return 1
+      fi
+    else
+      # Check if vitest config exists
+      if [[ -f "$app_dir/vitest.config.ts" || -f "$app_dir/vitest.config.js" ]]; then
+        (cd "$app_dir" && npx vitest run --reporter=verbose "${extra_args[@]}" 2>&1) || return 1
+      else
+        printf "  ${c_yellow}No vitest config found — skipping${c_reset}\n"
+        return 0
+      fi
+    fi
+    printf "${c_green}✓ ${app_name} tests complete${c_reset}\n"
+  }
+
+  case "$target" in
+    api|backend)
+      $has_backend && { run_backend_tests || FAIL=1; } || echo "No backend tests found"
+      ;;
+    e2e)
+      $has_e2e && { run_e2e_tests "" || FAIL=1; } || echo "No Playwright config found"
+      ;;
+    e2e:*)
+      # e2e:studio, e2e:console, etc.
+      local pw_project="${target#e2e:}"
+      $has_e2e && { run_e2e_tests "$pw_project" || FAIL=1; } || echo "No Playwright config found"
+      ;;
+    all)
+      $has_backend && { run_backend_tests || FAIL=1; }
+
+      # Run frontend app tests (vitest) for any app that has a config
+      for app in "${AVAILABLE_APPS[@]}"; do
+        if [[ -f "$PROJECT_ROOT/apps/$app/vitest.config.ts" || -f "$PROJECT_ROOT/apps/$app/vitest.config.js" ]]; then
+          run_frontend_tests "$app" || FAIL=1
+        fi
+      done
+
+      $has_e2e && { run_e2e_tests "" || FAIL=1; }
+      ;;
+    *)
+      # Check if it's an app name
+      local found=false
+      for app in "${AVAILABLE_APPS[@]}"; do
+        if [[ "$target" == "$app" ]]; then
+          run_frontend_tests "$app" || FAIL=1
+          found=true
+          break
+        fi
+      done
+      if ! $found; then
+        echo "Unknown test target: $target"
+        echo "Usage: otus test [api|e2e|e2e:<project>|<app>|all] [--coverage]"
+        exit 1
+      fi
+      ;;
+  esac
+
+  echo ""
+  if [[ $FAIL -eq 0 ]]; then
+    printf "${c_green}${c_bold}All tests passed ✓${c_reset}\n"
+  else
+    printf "${c_red}${c_bold}Some tests failed ✗${c_reset}\n"
+    exit 1
+  fi
+}
+
+# ═══════════════════════════════════════════════════════════════════════
+# MACHINE MANAGEMENT
+# ═══════════════════════════════════════════════════════════════════════
+
+add_machine() {
+  local env="${1:-}"
+  [[ -z "$env" ]] && { echo "Usage: otus add-machine <env>"; exit 1; }
+  [[ ! -f "$MACHINES_FILE" ]] && echo '{"environments":{}}' > "$MACHINES_FILE"
+  python3 -c "
+import json
+with open('$MACHINES_FILE', 'r') as f:
+    m = json.load(f)
+envs = m.setdefault('environments', {})
+cfg = envs.setdefault('$env', {'machines': [], 'domain': '', 'apiUrl': ''})
+machines = cfg.setdefault('machines', [])
+if '$HOSTNAME_SHORT' in machines:
+    print('Host \"$HOSTNAME_SHORT\" already registered for env \"$env\"')
+else:
+    machines.append('$HOSTNAME_SHORT')
+    with open('$MACHINES_FILE', 'w') as f:
+        json.dump(m, f, indent=2)
+        f.write('\n')
+    print('Added \"$HOSTNAME_SHORT\" to env \"$env\"')
+"
+}
+
+show_machines() {
+  [[ ! -f "$MACHINES_FILE" ]] && { echo "No machines.json found at $MACHINES_FILE"; exit 1; }
+  python3 -c "
+import json
+m = json.load(open('$MACHINES_FILE'))
+host = '$HOSTNAME_SHORT'
+for env, cfg in sorted(m.get('environments', {}).items()):
+    machines = cfg.get('machines', [])
+    domain = cfg.get('domain', '')
+    marker = ' ←' if host in machines else ''
+    hosts = ', '.join(machines) if machines else '(none)'
+    print(f'  {env:8s}  {hosts:30s}  {domain}{marker}')
+"
+}
+
+remove_machine() {
+  local env="${1:-}"
+  [[ -z "$env" ]] && { echo "Usage: otus remove-machine <env>"; exit 1; }
+  [[ ! -f "$MACHINES_FILE" ]] && { echo "No machines.json found"; exit 1; }
+  python3 -c "
+import json
+with open('$MACHINES_FILE', 'r') as f:
+    m = json.load(f)
+machines = m.get('environments', {}).get('$env', {}).get('machines', [])
+if '$HOSTNAME_SHORT' not in machines:
+    print('Host \"$HOSTNAME_SHORT\" not registered for env \"$env\"')
+else:
+    machines.remove('$HOSTNAME_SHORT')
+    with open('$MACHINES_FILE', 'w') as f:
+        json.dump(m, f, indent=2)
+        f.write('\n')
+    print('Removed \"$HOSTNAME_SHORT\" from env \"$env\"')
+"
+}
+
+# ═══════════════════════════════════════════════════════════════════════
+# DNS MODULE
+# ═══════════════════════════════════════════════════════════════════════
+
+dns_setup() {
+  local domain="${DNS_DOMAIN:-}"
+  [[ -z "$domain" ]] && { echo "ERROR: DNS_DOMAIN not set in otus.conf"; exit 1; }
+
+  local dropin="/etc/systemd/resolved.conf.d/${PROJECT_NAME:-otus}-dns.conf"
+  local tld="${domain##*.}"
+
+  echo "Configuring DNS for *.${domain} ..."
+
+  if [[ "$(uname)" == "Linux" ]]; then
+    if ! ip addr show lo | grep -q "127.0.0.2"; then
+      echo "  Adding 127.0.0.2 to loopback..."
+      sudo ip addr add 127.0.0.2/8 dev lo 2>/dev/null || true
+    fi
+    sudo mkdir -p /etc/systemd/resolved.conf.d
+    printf "[Resolve]\nDNS=127.0.0.2\nDomains=~%s" "$tld" | sudo tee "$dropin" >/dev/null
+    sudo systemctl restart systemd-resolved
+    echo "DNS configured: *.${domain} → 127.0.0.1 via dnsmasq"
+  elif [[ "$(uname)" == "Darwin" ]]; then
+    sudo mkdir -p /etc/resolver
+    printf "nameserver 127.0.0.1\nport 53\n" | sudo tee "/etc/resolver/$tld" >/dev/null
+    echo "DNS configured: *.${domain} → 127.0.0.1 via /etc/resolver/$tld"
+  fi
+}
+
+dns_teardown() {
+  if [[ "$(uname)" == "Linux" ]]; then
+    local dropin="/etc/systemd/resolved.conf.d/${PROJECT_NAME:-otus}-dns.conf"
+    if [[ -f "$dropin" ]]; then
+      sudo rm -f "$dropin"
+      sudo systemctl restart systemd-resolved
+      echo "DNS drop-in removed."
+    else
+      echo "No DNS drop-in found."
+    fi
+  elif [[ "$(uname)" == "Darwin" ]]; then
+    local domain="${DNS_DOMAIN:-}"
+    local tld="${domain##*.}"
+    if [[ -f "/etc/resolver/$tld" ]]; then
+      sudo rm -f "/etc/resolver/$tld"
+      echo "DNS resolver removed."
+    else
+      echo "No DNS resolver found."
+    fi
+  fi
+}
+
+dns_status() {
+  local domain="${DNS_DOMAIN:-}"
+  [[ -z "$domain" ]] && { echo "DNS_DOMAIN not set in otus.conf"; exit 1; }
+
+  if [[ "$(uname)" == "Linux" ]]; then
+    local dropin="/etc/systemd/resolved.conf.d/${PROJECT_NAME:-otus}-dns.conf"
+    [[ -f "$dropin" ]] && echo "Drop-in: present ($dropin)" || echo "Drop-in: missing ($dropin)"
+    echo "Resolution test:"
+    if resolvectl query "api.${domain}" &>/dev/null; then
+      resolvectl query "api.${domain}" 2>/dev/null | head -2
+    else
+      echo "  FAILED — api.${domain} did not resolve"
+      echo "  Run: otus dns-setup"
+    fi
+  elif [[ "$(uname)" == "Darwin" ]]; then
+    local tld="${domain##*.}"
+    [[ -f "/etc/resolver/$tld" ]] && echo "Resolver: present (/etc/resolver/$tld)" || echo "Resolver: missing"
+    echo "Resolution test:"
+    if host "api.${domain}" 127.0.0.1 &>/dev/null; then
+      host "api.${domain}" 127.0.0.1 2>/dev/null | head -2
+    else
+      echo "  FAILED — api.${domain} did not resolve"
+      echo "  Run: otus dns-setup"
+    fi
+  fi
+}
+
+# ═══════════════════════════════════════════════════════════════════════
+# USAGE / HELP
+# ═══════════════════════════════════════════════════════════════════════
+
+usage() {
+  local me="otus"
+  local detected
+  detected=$(detect_env 2>/dev/null || true)
+  cat <<EOF
+${PROJECT_NAME:-otus} — Project CLI (v${OTUS_VERSION})
+
+PROJECT: $PROJECT_ROOT
+
+DOCKER
+  $me up [group...]             Start containers (with auto-deps)
+  $me stop [group...]           Stop containers
+  $me down [group...]           Stop + remove containers
+  $me restart [svc...]          Restart running containers
+  $me build [svc...]            Build images only
+  $me logs [service...]         Tail logs (last 100 lines)
+  $me status                    Show running containers
+  $me list                      Show all services with status and ports
+  $me explore                   Full container/volume/network inventory
+  $me <group> <command> [flags] Group-aware shorthand (auto-resolves deps)
+  Flags: --build, --no-cache
+  Destroy: destroy-containers, destroy-volumes, destroy-images, destroy-all
+
+TEST
+  $me test                      Run all tests (backend + frontend + e2e)
+  $me test api                  Backend tests only (pytest)
+  $me test e2e                  E2E tests only (Playwright)
+  $me test e2e:<project>        E2E for specific Playwright project
+  $me test <app>                Frontend app tests (vitest)
+  $me test --coverage           Run with coverage report
+  $me test api --coverage       Backend with coverage
+
+DNS
+  $me dns-setup                 Configure local DNS for *.domain
+  $me dns-teardown              Remove DNS config
+  $me dns-status                Check DNS resolution health
+
+MACHINES
+  $me machines                  Show env ↔ host mappings
+  $me add-machine <env>         Register this host ($HOSTNAME_SHORT)
+  $me remove-machine <env>      Unregister this host
+
+GROUPS: $ALL_GROUPS
+EOF
+  if [[ ${#AVAILABLE_APPS[@]} -gt 0 ]]; then
+    echo "APPS: ${AVAILABLE_APPS[*]}"
+  fi
+  if [[ -n "$detected" ]]; then
+    echo ""
+    echo "HOST: $HOSTNAME_SHORT → $detected"
+  else
+    echo ""
+    echo "HOST: $HOSTNAME_SHORT → (not mapped, run: $me add-machine <env>)"
+  fi
+  exit 1
+}
+
+# ═══════════════════════════════════════════════════════════════════════
+# COMPLETIONS
+# ═══════════════════════════════════════════════════════════════════════
+
+if [[ "${1:-}" == "--completions" ]]; then
+  cat <<'COMPLETION'
+_otus_complete() {
+  local cur="${COMP_WORDS[COMP_CWORD]}"
+  local commands="status up build stop down restart logs list explore destroy-containers destroy-volumes destroy-images destroy-all"
+  local test_cmd="test"
+  local dns="dns-setup dns-teardown dns-status"
+  local mgmt="machines add-machine remove-machine"
+  local flags="--build --no-cache --coverage"
+
+  local proj_root="$PWD"
+  while [[ "$proj_root" != "/" ]]; do
+    [[ -f "$proj_root/infra/configs/otus.conf" || -f "$proj_root/infra/configs/dctl.conf" ]] && break
+    proj_root="$(dirname "$proj_root")"
+  done
+  local groups=""
+  local conf="$proj_root/infra/configs/otus.conf"
+  [[ ! -f "$conf" ]] && conf="$proj_root/infra/configs/dctl.conf"
+  [[ -f "$conf" ]] && groups=$(grep '^ALL_GROUPS=' "$conf" 2>/dev/null | sed 's/ALL_GROUPS=//' | tr -d '"')
+
+  case "$COMP_CWORD" in
+    1) COMPREPLY=($(compgen -W "$commands $test_cmd $dns $mgmt $groups --version --help" -- "$cur")) ;;
+    *)
+      case "${COMP_WORDS[1]}" in
+        test) COMPREPLY=($(compgen -W "api e2e all --coverage $groups" -- "$cur")) ;;
+        up|build) COMPREPLY=($(compgen -W "$groups $flags" -- "$cur")) ;;
+        add-machine|remove-machine) COMPREPLY=($(compgen -W "dev stg prod" -- "$cur")) ;;
+        *) COMPREPLY=($(compgen -W "$groups" -- "$cur")) ;;
+      esac ;;
+  esac
+}
+if [[ -n "${ZSH_VERSION:-}" ]]; then
+  autoload -U +X bashcompinit && bashcompinit 2>/dev/null || true
+fi
+complete -F _otus_complete otus
+COMPLETION
+  exit 0
+fi
+
+# ═══════════════════════════════════════════════════════════════════════
+# MAIN DISPATCH
+# ═══════════════════════════════════════════════════════════════════════
+
+[[ $# -lt 1 || "${1:-}" == "--help" || "${1:-}" == "-h" ]] && usage
+[[ "${1:-}" == "--version" || "${1:-}" == "-v" ]] && { echo "otus $OTUS_VERSION"; exit 0; }
+
+case "$1" in
+  # Machine management
+  add-machine)    shift; add_machine "$@"; exit 0 ;;
+  remove-machine) shift; remove_machine "$@"; exit 0 ;;
+  machines)       show_machines; exit 0 ;;
+
+  # DNS
+  dns-setup)      dns_setup; exit 0 ;;
+  dns-teardown)   dns_teardown; exit 0 ;;
+  dns-status)     dns_status; exit 0 ;;
+
+  # Test
+  test)           shift; cmd_test "$@"; exit 0 ;;
+
+  # List / Explore
+  list)           cmd_list; exit 0 ;;
+  explore)        cmd_explore; exit 0 ;;
+esac
+
+# Docker commands
+# Support: otus <command> [args] or otus <group> <command> [flags]
+if is_docker_command "$1"; then
+  cmd="$1"; shift
+  docker_dispatch "$cmd" "$@"
+elif is_env "$1"; then
+  stack="$1"; cmd="$2"
+  [[ -z "$cmd" ]] && usage
+  shift 2
+  COMPOSE_FILE="${COMPOSE_FILES[$stack]}"
+  [[ ! -f "$COMPOSE_FILE" ]] && { echo "ERROR: compose file not found for $stack"; exit 1; }
+  validate_host "$stack"
+  echo "[$HOSTNAME_SHORT] $stack → $cmd $*"
+  FLAG_BUILD=0; FLAG_NO_CACHE=0; RAW=()
+  for arg in "$@"; do
+    case "$arg" in
+      --build) FLAG_BUILD=1 ;; --no-cache|--nocache) FLAG_NO_CACHE=1 ;; *) RAW+=("$arg") ;;
+    esac
+  done
+  run_dc "$COMPOSE_FILE" "$cmd" "$FLAG_BUILD" "$FLAG_NO_CACHE" "${RAW[@]}"
+elif is_group "$1" && is_docker_command "${2:-}"; then
+  group="$1"; cmd="$2"; shift 2
+  docker_dispatch "$cmd" "$group" "$@"
+else
+  echo "Unknown command: $1"
+  usage
+fi
