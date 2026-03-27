@@ -49,7 +49,7 @@ Public sanitized copy of claude-config. If the directory exists, changed files a
 | `learning/*.md` | config → forge | Sanitized learning files |
 | `CLAUDE.md`, `settings.json`, etc. | config → forge | Top-level configs |
 
-**Not synced to forge:** `context/`, `projects/` (contain private project data), `.claude/` (session data).
+**Not synced to forge:** `context/`, `projects/` (contain private project data), `.claude/` (session data), `machine-stats/` (per-machine session counts).
 
 ## Steps
 

@@ -275,6 +275,48 @@ SESSION_COUNT=$(find "$HOME/.claude/projects" -maxdepth 2 -name '*.jsonl' -type 
 # Subagent session count
 SUBAGENT_COUNT=$(find "$HOME/.claude/projects" -mindepth 3 -name 'agent-*.jsonl' -type f 2>/dev/null | wc -l | tr -d ' ')
 
+# Cross-machine stats — write local, read all (throttled to every 5 min)
+MACHINE_STATS_DIR="$HOME/code/github/claude-config/machine-stats"
+MACHINE_NAME=$(hostname -s 2>/dev/null || echo "unknown")
+MACHINE_STATS_FILE="$MACHINE_STATS_DIR/${MACHINE_NAME}.json"
+machine_stats_max_age=300
+
+TOTAL_SESSIONS="$SESSION_COUNT"
+TOTAL_SUBAGENTS="$SUBAGENT_COUNT"
+OTHER_MACHINES=""
+
+if [ -d "$MACHINE_STATS_DIR" ]; then
+  # Write local stats (throttled)
+  should_write=0
+  if [ ! -f "$MACHINE_STATS_FILE" ]; then
+    should_write=1
+  else
+    file_age=$(( $(date +%s) - $(stat -f %m "$MACHINE_STATS_FILE" 2>/dev/null || stat -c %Y "$MACHINE_STATS_FILE" 2>/dev/null || echo 0) ))
+    [ "$file_age" -gt "$machine_stats_max_age" ] && should_write=1
+  fi
+  if [ "$should_write" -eq 1 ]; then
+    printf '{"machine":"%s","sessions":%d,"subagents":%d,"updated":"%s"}\n' \
+      "$MACHINE_NAME" "$SESSION_COUNT" "$SUBAGENT_COUNT" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+      > "$MACHINE_STATS_FILE"
+  fi
+
+  # Read all machines and aggregate (re-enable globbing temporarily — set -f is active)
+  set +f
+  for sf in "$MACHINE_STATS_DIR"/*.json; do
+    [ -f "$sf" ] || continue
+    m=$(jq -r '.machine // empty' "$sf" 2>/dev/null)
+    s=$(jq -r '.sessions // 0' "$sf" 2>/dev/null)
+    a=$(jq -r '.subagents // 0' "$sf" 2>/dev/null)
+    [ -z "$m" ] && continue
+    if [ "$m" != "$MACHINE_NAME" ]; then
+      TOTAL_SESSIONS=$((TOTAL_SESSIONS + s))
+      TOTAL_SUBAGENTS=$((TOTAL_SUBAGENTS + a))
+      OTHER_MACHINES="${OTHER_MACHINES}${OTHER_MACHINES:+, }${m}:${s}/${a}"
+    fi
+  done
+  set -f
+fi
+
 # Random quote (cached 10 min so it doesn't change every refresh)
 QUOTE_TEXT=""
 QUOTE_AUTHOR=""
@@ -679,9 +721,14 @@ printf "${RED}⛯${RESET} ${WHITE}ENV:${RESET} ${BLUE}CC:${CC_VERSION}${RESET}${
 # MEMORY
 printf "${MAGENTA}◎${RESET} ${WHITE}MEMORY:${RESET} ${WHITE}${LEARNING_COUNT}${RESET}${DIM} learnings${RESET}"
 [ -n "$COST_TODAY" ] && printf "${SEP}${MAGENTA}${COST_TODAY}${RESET}${DIM} today${RESET}"
-printf "${SEP}${WHITE}${SESSION_COUNT}${RESET}${DIM} sessions${RESET}"
-if [ "$SUBAGENT_COUNT" -gt 0 ] 2>/dev/null; then
-  printf "${SEP}${WHITE}${SUBAGENT_COUNT}${RESET}${DIM} subagent sessions${RESET}"
+if [ -n "$OTHER_MACHINES" ]; then
+  printf "${SEP}${WHITE}${TOTAL_SESSIONS}${RESET}${DIM} sessions${RESET}${DIM} (${MACHINE_NAME}:${SESSION_COUNT}${RESET}"
+  printf "${DIM}, ${OTHER_MACHINES})${RESET}"
+else
+  printf "${SEP}${WHITE}${SESSION_COUNT}${RESET}${DIM} sessions${RESET}"
+fi
+if [ "$TOTAL_SUBAGENTS" -gt 0 ] 2>/dev/null; then
+  printf "${SEP}${WHITE}${TOTAL_SUBAGENTS}${RESET}${DIM} subagents${RESET}"
 fi
 printf "\n"
 

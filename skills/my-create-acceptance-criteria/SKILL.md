@@ -115,7 +115,7 @@ Output:
 
 ## Notes
 
-- This skill uses your project's `docs/build/acceptance-criteria.md` as the gold standard template. When creating criteria for a new project, model the depth and specificity of that document.
+- This skill uses the SpeakLaunch `docs/build/acceptance-criteria.md` as the gold standard template. When creating criteria for a new project, model the depth and specificity of that document.
 - The Skeptic agent (`~/.claude/agents/debate/skeptic.md`) is the most important sub-agent here. Load its identity before the gap analysis phase.
 - This skill should be re-run whenever: a new phase doc is added, a major architectural decision changes, or an implementation phase reveals gaps not previously considered.
 - Never mark a project as "ready to implement" until this doc exists and passes the Step 5 self-check.
