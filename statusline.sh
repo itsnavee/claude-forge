@@ -266,8 +266,29 @@ fi
 # Agent count
 AGENT_COUNT=$(find "$HOME/.claude/agents" -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
 
-# Learning file count
-LEARNING_COUNT=$(find "$HOME/.claude/learning" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+# Learning entry count (### headings across all learning files)
+LEARNING_COUNT=$(grep -ch '^### ' "$HOME/.claude/learning"/*.md 2>/dev/null | awk '{s+=$1} END {print s+0}')
+
+# RTK token savings (cached — rtk gain is fast but no need to run every render)
+RTK_SAVED=""
+RTK_PCT=""
+RTK_CMDS=""
+if command -v rtk &>/dev/null; then
+  RTK_JSON=$(rtk gain --format json 2>/dev/null)
+  if [ -n "$RTK_JSON" ]; then
+    RTK_SAVED=$(echo "$RTK_JSON" | jq -r '.summary.total_saved // 0' 2>/dev/null)
+    RTK_PCT=$(echo "$RTK_JSON" | jq -r '.summary.avg_savings_pct // 0' 2>/dev/null | cut -d. -f1)
+    RTK_CMDS=$(echo "$RTK_JSON" | jq -r '.summary.total_commands // 0' 2>/dev/null)
+    # Format saved tokens (K/M)
+    if [ "$RTK_SAVED" -ge 1000000 ] 2>/dev/null; then
+      RTK_DISPLAY="$(echo "$RTK_SAVED" | awk '{printf "%.1fM", $1/1000000}')"
+    elif [ "$RTK_SAVED" -ge 1000 ] 2>/dev/null; then
+      RTK_DISPLAY="$(echo "$RTK_SAVED" | awk '{printf "%.0fK", $1/1000}')"
+    else
+      RTK_DISPLAY="${RTK_SAVED}"
+    fi
+  fi
+fi
 
 # Session count (depth 2 = project/session.jsonl, excludes subagent transcripts)
 SESSION_COUNT=$(find "$HOME/.claude/projects" -maxdepth 2 -name '*.jsonl' -type f 2>/dev/null | wc -l | tr -d ' ')
@@ -713,8 +734,12 @@ if [ -n "$rate_lines" ]; then
   printf "${DIM}────────────────────────────────────────────────────────────────────────────────${RESET}\n"
 fi
 
-# ENV
-printf "${RED}⛯${RESET} ${WHITE}ENV:${RESET} ${BLUE}CC:${CC_VERSION}${RESET}${SEP}${WHITE}SK:${SKILL_COUNT}${RESET}${SEP}${WHITE}AG:${AGENT_COUNT}${RESET}${SEP}${WHITE}Hooks:${HOOK_COUNT}${RESET}\n"
+# ENV + RTK
+printf "${RED}⛯${RESET} ${WHITE}ENV:${RESET} ${BLUE}CC:${CC_VERSION}${RESET}${SEP}${WHITE}SK:${SKILL_COUNT}${RESET}${SEP}${WHITE}AG:${AGENT_COUNT}${RESET}${SEP}${WHITE}Hooks:${HOOK_COUNT}${RESET}"
+if [ -n "$RTK_DISPLAY" ]; then
+  printf "${SEP}${GREEN}💰${RESET} ${WHITE}${RTK_DISPLAY}${RESET}${DIM} tokens saved on ${RESET}${WHITE}${RTK_CMDS}${RESET}${DIM} cmds${RESET} ${DIM}(${RESET}${WHITE}${RTK_PCT}%%${RESET}${DIM} efficiency)${RESET}"
+fi
+printf "\n"
 
 # MEMORY
 printf "${MAGENTA}◎${RESET} ${WHITE}MEMORY:${RESET} ${WHITE}${LEARNING_COUNT}${RESET}${DIM} learnings${RESET}"

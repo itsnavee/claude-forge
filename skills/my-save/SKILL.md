@@ -112,7 +112,7 @@ Complete/Incomplete. Any follow-up notes.
 After writing the summary, sync all missing transcripts from `~/.claude/projects/` to the project.
 
 **Skip list** — do NOT copy transcripts for these projects (no value, or config-only repos):
-`my-project-4`, `claude-forge`, `claude-config`
+`my-project`, `claude-forge`, `claude-config`
 
 6. **Copy transcripts** — derive the source directory and sync all missing jsonl files:
 
@@ -124,7 +124,7 @@ After writing the summary, sync all missing transcripts from `~/.claude/projects
 
    # Skip list check
    PROJ_NAME=$(basename "$PROJECT_ROOT")
-   case "$PROJ_NAME" in my-project-4|claude-forge|claude-config) echo "SKIP: $PROJ_NAME is on transcript skip list"; exit 0;; esac
+   case "$PROJ_NAME" in my-project|claude-forge|claude-config) echo "SKIP: $PROJ_NAME is on transcript skip list"; exit 0;; esac
 
    # Sync all missing transcripts
    mkdir -p "$DEST_DIR"
@@ -253,7 +253,7 @@ If >= 5 unconsolidated sessions:
     - **Recurring patterns or mistakes** across sessions (same bug class, same debugging approach)
     - **New architectural decisions** that should be permanent knowledge
     - **Gotchas** that came up multiple times
-    - **Cross-project connections** — did this session touch a pattern that exists in another project? (check second-brain `projects/` if unsure)
+    - **Cross-project connections** — did this session touch a pattern that exists in another project? (check my-project `projects/` if unsure)
 16. **Update MEMORY.md** — Append consolidated insights under a new section:
 
 ```markdown

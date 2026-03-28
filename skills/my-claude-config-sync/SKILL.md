@@ -121,7 +121,7 @@ Public sanitized copy of claude-config. If the directory exists, changed files a
    PATTERNS_FILE="$CONFIG/sanitize-patterns.conf"
    ```
    Read non-comment, non-directive lines from the patterns file. For each pattern, run `grep -rl` across the forge repo and `sed -i` to replace matches:
-   - Private project names (my-project, my-project-2, etc.) → replace with `<private-project>`
+   - Private project names (my-project, my-project, etc.) → replace with `<private-project>`
    - `youruser` → `youruser`
    - `$HOME` or `$HOME` → `$HOME`
    - `youruser@` → `you@`

@@ -24,7 +24,7 @@ Infrastructure, tooling, environment, and config issues.
 
 
 ### 2026-03-18 — Subagent JSONL output has line-number prefixes from Read tool
-**Project**: second-brain
+**Project**: my-project
 **Context**: Tried to extract research-result JSON from background agent output file — Read tool adds line-number prefixes that break JSON parsing
 **Learning**: When reading agent output files persisted by the system, strip line-number prefixes with sed before JSON parsing: `sed "s/^[[:space:]]*[0-9]*→//"`. Or use Bash cat directly instead of Read tool for raw JSONL.
 

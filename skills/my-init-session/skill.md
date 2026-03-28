@@ -15,7 +15,7 @@ Prepares a clean working environment before implementation begins. Creates struc
 ## Usage
 
 - `/my-init-session` — auto-detect project, create/update features.json
-- `/my-init-session my-project-2` — init for a specific project
+- `/my-init-session my-project` — init for a specific project
 - Run at the start of any implementation session
 
 ## Behavior
@@ -98,7 +98,7 @@ Each completed feature: git commit + update features.json.
 
 ## Gotchas
 
-- Don't run this on the second-brain repo — it's not an implementation project
+- Don't run this on the my-project repo — it's not an implementation project
 - features.json should have 3-8 features max — if more, the scope is too large for one session
 - Environment checks may fail on first run (missing deps, Docker not started) — report and let user fix
 - state.md must exist — if it doesn't, suggest running /my-save first to create it

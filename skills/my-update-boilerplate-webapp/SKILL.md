@@ -7,7 +7,7 @@ allowed-tools: Bash(bash:*), Bash(git:*), Read, Write, Edit, Glob, Grep
 
 # Update Boilerplate Webapp
 
-Push improvements from the current project (my-project-2, my-project-5, etc.) back to the shared `boilerplate-webapp` repo. Uses a helper script for mechanical copying and AI intelligence for complex genericization.
+Push improvements from the current project (my-project, my-project, etc.) back to the shared `boilerplate-webapp` repo. Uses a helper script for mechanical copying and AI intelligence for complex genericization.
 
 ## Config & Script Locations
 
@@ -79,7 +79,7 @@ For each file to sync:
      bash ~/code/github/claude-config/update-boilerplate.sh <project> <app> <path>
      ```
 
-   - **Mode B — Sed genericization**: The file has ONLY simple brand-string differences (e.g., `my-project-2-theme` → `app-theme`, `Sawabi` → `MyApp`). The replacement list in the config handles it.
+   - **Mode B — Sed genericization**: The file has ONLY simple brand-string differences (e.g., `my-project-theme` → `app-theme`, `Sawabi` → `MyApp`). The replacement list in the config handles it.
      ```bash
      bash ~/code/github/claude-config/update-boilerplate.sh <project> <app> <path> --genericize
      ```
@@ -164,4 +164,4 @@ To support syncing from a new project:
 - `/my-update-boilerplate-webapp ui` — sync UI profile (components, pages)
 - `/my-update-boilerplate-webapp src/components/Button.tsx` — sync specific file
 - `/my-update-boilerplate-webapp --smart` — AI-assisted genericization (replaces brand strings)
-**Source projects**: my-project-2, my-project-5 (configured in `boilerplate-sync-config.json`).
+**Source projects**: my-project, my-project (configured in `boilerplate-sync-config.json`).

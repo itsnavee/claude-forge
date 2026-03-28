@@ -13,7 +13,7 @@ Classifies fetched content against active projects, learning topics, side income
 ## Prerequisites
 
 - Content already fetched (via /my-fetch-tweet, /my-fetch-repo, /my-fetch-article, or provided inline)
-- `~/code/github/second-brain/OWNER-CONTEXT.md` exists
+- `~/code/github/my-project/OWNER-CONTEXT.md` exists
 
 ## Usage
 
@@ -24,7 +24,7 @@ Classifies fetched content against active projects, learning topics, side income
 ## Behavior
 
 ### 1. Load Context
-Read `~/code/github/second-brain/OWNER-CONTEXT.md` for:
+Read `~/code/github/my-project/OWNER-CONTEXT.md` for:
 - Active projects with gaps
 - Exploration areas and pain points
 - Side income ideas and monetization patterns

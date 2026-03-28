@@ -194,8 +194,8 @@ Example: `ECC_HOOK_PROFILE=minimal claude` — runs with only essential hooks.
 ## Cross-Project Context
 
 - **Port map & project index:** `~/.claude/projects/README.md` — global port assignments, project status, shared infra
-- **Deep project docs:** `~/code/github/second-brain/projects/<name>.md` — architecture, decisions, journey, problems
-- Never duplicate what's in second-brain. Reference it instead.
+- **Deep project docs:** `~/code/github/my-project/projects/<name>.md` — architecture, decisions, journey, problems
+- Never duplicate what's in my-project. Reference it instead.
 
 ---
 
@@ -223,7 +223,7 @@ Example: `ECC_HOOK_PROFILE=minimal claude` — runs with only essential hooks.
     ├── my-sync-all/
     ├── my-project-to-brain-sync/
     ├── my-research-targets/
-    ├── my-second-brain-find-potential-improvements/
+    ├── my-my-project-find-potential-improvements/
     ├── my-claude-config-sync/
     ├── my-update-boilerplate-webapp/
     ├── my-show-info/              # Quick lookup for skills, hooks, agents, session, settings

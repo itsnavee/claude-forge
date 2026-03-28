@@ -228,6 +228,23 @@ case "$EFFORT" in
   *)      EFFORT_STR="${DIM}◑ default${RESET}" ;;
 esac
 
+# RTK token savings
+RTK_MINI=""
+if command -v rtk &>/dev/null; then
+  RTK_JSON=$(rtk gain --format json 2>/dev/null)
+  if [ -n "$RTK_JSON" ]; then
+    RTK_SAVED=$(echo "$RTK_JSON" | jq -r '.summary.total_saved // 0' 2>/dev/null)
+    RTK_PCT=$(echo "$RTK_JSON" | jq -r '.summary.avg_savings_pct // 0' 2>/dev/null | cut -d. -f1)
+    if [ "$RTK_SAVED" -ge 1000000 ] 2>/dev/null; then
+      RTK_MINI="$(echo "$RTK_SAVED" | awk '{printf "%.1fM", $1/1000000}')"
+    elif [ "$RTK_SAVED" -ge 1000 ] 2>/dev/null; then
+      RTK_MINI="$(echo "$RTK_SAVED" | awk '{printf "%.0fK", $1/1000}')"
+    else
+      RTK_MINI="${RTK_SAVED}"
+    fi
+  fi
+fi
+
 # ── Fetch usage data (cached 60s) ─────────────────────
 cache_file="/tmp/claude/statusline-usage-cache.json"
 cache_max_age=60
@@ -310,8 +327,10 @@ fi
 # ── OUTPUT: Mini layout ──────────────────────────────
 # ══════════════════════════════════════════════════════
 
-# MODEL + CONTEXT on same line
-printf "${MAGENTA}⬡${RESET} ${CYAN}${MODEL}${RESET}${SEP}${EFFORT_STR}${SEP}${GREEN}⛁${RESET} ${CTX_COLOR}${CTX_PCT}%%${RESET} ${DIM}${CTX_DISPLAY}${RESET}\n"
+# MODEL + CONTEXT + RTK on same line
+printf "${MAGENTA}⬡${RESET} ${CYAN}${MODEL}${RESET}${SEP}${EFFORT_STR}${SEP}${GREEN}⛁${RESET} ${CTX_COLOR}${CTX_PCT}%%${RESET} ${DIM}${CTX_DISPLAY}${RESET}"
+[ -n "$RTK_MINI" ] && printf "${SEP}${GREEN}💰 ${RESET}${WHITE}${RTK_MINI}${RESET}${DIM}(${RTK_PCT}%%)${RESET}"
+printf "\n"
 
 # NET + PWD on same line
 NET_PART="${MAGENTA}${HOSTNAME_VAL}${RESET}"

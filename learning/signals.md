@@ -25,7 +25,7 @@
 
 
 ### 2026-03-18 — 62c9a22f — 9/10
-**Project**: second-brain, cli-coding-setup | **Task**: Research 4 tweets + build 6 skills + 2 hooks
+**Project**: my-project, cli-coding-setup | **Task**: Research 4 tweets + build 6 skills + 2 hooks
 **Rating reason**: Highly productive — researched 4 high-signal articles, built 6 new skills with hooks, wrote 25+ improvement entries, deep-dived anthropics/skills repo. Clean execution with parallel agents.
 
 
@@ -46,7 +46,7 @@
 
 
 ### 2026-03-18 — 8e571636 — 8/10
-**Project**: my-project-5 | **Task**: Loop 4 — 7 tasks + /simplify + Stripe MCP
+**Project**: my-project | **Task**: Loop 4 — 7 tasks + /simplify + Stripe MCP
 **Rating reason**: High throughput (7 tasks, 8 review fixes, 1100+ lines) with good quality — caught 4 already-done tasks early, security fixes in review.
 
 
@@ -64,7 +64,7 @@
 
 
 ### 2026-03-21 — 9bb810a4 — 9/10
-**Project**: my-project-5 | **Task**: /my-loop 48/50 task backlog execution
+**Project**: my-project | **Task**: /my-loop 48/50 task backlog execution
 **Rating reason**: Exceptional productivity — 48 tasks across backend, 4 frontends, infra. 153 tests. Only stopped for genuinely blocked items. User feedback mid-session about not pausing was addressed immediately.
 
 
@@ -80,7 +80,7 @@
 
 
 ### 2026-03-23 — 49b5b59c — 7/10
-**Project**: my-project-4 | **Task**: Docs reorg, backlog planning, ASMR competitive analysis
+**Project**: my-project | **Task**: Docs reorg, backlog planning, ASMR competitive analysis
 **Rating reason**: Productive session — reorganized docs, vetted 20+ improvement suggestions, analyzed key competitor intel, but tweet fetching blocked by missing auth tokens
 
 
@@ -90,7 +90,7 @@
 
 
 ### 2026-03-24 — 673150fb — 6/10
-**Project**: my-project-5 | **Task**: Stripe dashboard setup guidance & docs
+**Project**: my-project | **Task**: Stripe dashboard setup guidance & docs
 **Rating reason**: Advisory session with doc formatting — no code changes but provided solid Stripe onboarding checklist
 
 
@@ -116,8 +116,8 @@
 
 
 ### 2026-03-28 — 44c470f0 — 8/10
-**Project**: my-project-2 | **Task**: Competitor deep-dives + strategic Q&A + market corrections
-**Rating reason**: High-value strategic session — 3 parallel competitor deep-dives, corrected market positioning, clarified build-vs-buy decisions, updated multiple files across my-project-2 + my-project-3. Good use of background agents.
+**Project**: my-project | **Task**: Competitor deep-dives + strategic Q&A + market corrections
+**Rating reason**: High-value strategic session — 3 parallel competitor deep-dives, corrected market positioning, clarified build-vs-buy decisions, updated multiple files across my-project + my-project. Good use of background agents.
 
 
 

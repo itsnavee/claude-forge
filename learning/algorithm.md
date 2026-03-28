@@ -27,7 +27,7 @@ Wrong approaches, over-engineering, missed requirements, process mistakes.
 
 
 ### 2026-03-18 — Codebase reality check before planning
-**Project**: my-project-5
+**Project**: my-project
 **Context**: Planned 11 tasks but 4 were already implemented (wishlist, SKU display, order number, templates gallery, security audit)
 **Learning**: Always grep/search the codebase BEFORE adding tasks to a loop. Progress docs can be stale. The codebase is the source of truth.
 
@@ -37,7 +37,7 @@ Wrong approaches, over-engineering, missed requirements, process mistakes.
 
 
 ### 2026-03-21 — loop continuity
-**Project**: my-project-5
+**Project**: my-project
 **Context**: User pointed out I was stopping every 3-5 tasks to output summaries and wait for "continue"
 **Learning**: In /my-loop, don't pause between tasks for summaries. Execute continuously until the list is exhausted or context runs out. Checkpoint via git commits, not conversation pauses.
 

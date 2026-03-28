@@ -85,7 +85,7 @@ Scan for leaked credentials:
 - API keys: AKIA[0-9A-Z]{16}, sk-[a-zA-Z0-9]{48}, ghp_[a-zA-Z0-9]{36}
 - Tokens: Bearer [a-zA-Z0-9._-]+, token["\s:=]+["'][a-zA-Z0-9]+
 - Passwords: password["\s:=]+["'][^"']+, DATABASE_URL=.*:.*@
-- Private keys: -----BEGIN (RSA |EC )?PRIVATE KEY-----
+- Private keys: -----my-project-----
 - Connection strings: postgresql://.*:.*@, mongodb://.*:.*@, redis://.*:.*@
 ```
 
