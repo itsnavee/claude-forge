@@ -36,6 +36,7 @@ Wrong approaches, over-engineering, missed requirements, process mistakes.
 
 
 
+
 ### 2026-03-21 — loop continuity
 **Project**: my-project
 **Context**: User pointed out I was stopping every 3-5 tasks to output summaries and wait for "continue"
@@ -50,6 +51,7 @@ Wrong approaches, over-engineering, missed requirements, process mistakes.
 **Project**: my-project
 **Context**: Evaluated Hetzner LB vs CF LB for production. Hetzner LB requires VPS on private network but Hetzner has no managed NAT gateway — VPS can't make outbound API calls without a public IP or extra NAT VPS.
 **Learning**: CF Tunnel (free) + CF LB ($5/mo) is better: tunnel creates outbound-only connection, VPS keeps public IP but firewalls ALL inbound. Result: zero open ports + full outbound connectivity. Hetzner LB adds complexity for no security benefit.
+
 
 
 

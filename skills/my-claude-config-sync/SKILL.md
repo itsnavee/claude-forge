@@ -124,7 +124,7 @@ Public sanitized copy of claude-config. If the directory exists, changed files a
    - Private project names (my-project, my-project, etc.) → replace with `<private-project>`
    - `youruser` → `youruser`
    - `$HOME` or `$HOME` → `$HOME`
-   - `youruser@` → `you@`
+   - `you@example.com` → `you@`
    - API key patterns → `<redacted>`
 
    **Do NOT sanitize:** `sanitize-patterns.conf` itself (it's the reference), `.git/`, binary files.

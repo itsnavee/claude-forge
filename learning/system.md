@@ -12,6 +12,8 @@ Infrastructure, tooling, environment, and config issues.
 
 
 
+
+
 ### 2026-03-14 — session-start hook injecting 80 lines of context silently
 **Project**: claude-config
 **Context**: Token usage spiked after adding state.md/architecture.md pattern. Investigation found session-start hook was injecting last 80 lines of session summary into every new session, plus CLAUDE.md was loaded twice in claude-config repo.
@@ -23,10 +25,13 @@ Infrastructure, tooling, environment, and config issues.
 
 
 
+
+
 ### 2026-03-18 — Subagent JSONL output has line-number prefixes from Read tool
 **Project**: my-project
 **Context**: Tried to extract research-result JSON from background agent output file — Read tool adds line-number prefixes that break JSON parsing
 **Learning**: When reading agent output files persisted by the system, strip line-number prefixes with sed before JSON parsing: `sed "s/^[[:space:]]*[0-9]*→//"`. Or use Bash cat directly instead of Read tool for raw JSONL.
+
 
 
 
@@ -46,6 +51,7 @@ Infrastructure, tooling, environment, and config issues.
 **Project**: kubernetes-labs
 **Context**: SSH key path used `$HOME/.ssh/...` but script runs via `sudo`, so `$HOME` became `/root`
 **Learning**: In scripts that run as root via sudo, hardcode user paths or use `SUDO_USER` to resolve the real home directory. Never rely on `$HOME` for the invoking user's files.
+
 
 
 

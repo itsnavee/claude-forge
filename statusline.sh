@@ -267,7 +267,7 @@ fi
 AGENT_COUNT=$(find "$HOME/.claude/agents" -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
 
 # Learning entry count (### headings across all learning files)
-LEARNING_COUNT=$(grep -ch '^### ' "$HOME/.claude/learning"/*.md 2>/dev/null | awk '{s+=$1} END {print s+0}')
+LEARNING_COUNT=$(set +f; grep -ch '^### ' "$HOME/.claude/learning"/*.md 2>/dev/null | awk '{s+=$1} END {print s+0}')
 
 # RTK token savings (cached — rtk gain is fast but no need to run every render)
 RTK_SAVED=""

@@ -266,8 +266,8 @@ fi
 # Agent count
 AGENT_COUNT=$(find "$HOME/.claude/agents" -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
 
-# Learning file count
-LEARNING_COUNT=$(find "$HOME/.claude/learning" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+# Learning entry count (### headings across all learning files)
+LEARNING_COUNT=$(set +f; grep -ch '^### ' "$HOME/.claude/learning"/*.md 2>/dev/null | awk '{s+=$1} END {print s+0}')
 
 # Session summary count
 SESSION_COUNT=$(find "$HOME/.claude/sessions" -maxdepth 1 -name 'summary_*.md' 2>/dev/null | wc -l | tr -d ' ')
