@@ -3,6 +3,10 @@ name: bug-hunt
 description: Use when you want to find bugs before shipping — runs 3 adversarial agents (Hunter finds bugs, Skeptic disproves false positives, Referee arbitrates) against your codebase or specific files. Also use when the user says "find bugs", "hunt for issues", or "check for problems".
 argument-hint: "< path | -b branch [--base base-branch] >"
 disable-model-invocation: true
+gate:
+  type: cooldown
+  duration: 15m
+  reason: "Runs 3 adversarial agents (Hunter, Skeptic, Referee). Re-running on unchanged code finds the same bugs."
 ---
 
 # Bug Hunt - Adversarial Bug Finding

@@ -74,7 +74,7 @@ git_update() {
     git commit -m "$(cat <<EOF
 $MSG
 
-Co-Authored-By: naveed.ahmed <5332157+you@users.noreply.github.com>
+Co-Authored-By: naveed.ahmed <5332157+youruser@users.noreply.github.com>
 Co-Authored-By: Claude <noreply@anthropic.com>
 EOF
 )" 2>/dev/null

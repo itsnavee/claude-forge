@@ -283,7 +283,6 @@ machine_stats_max_age=300
 
 TOTAL_SESSIONS="$SESSION_COUNT"
 TOTAL_SUBAGENTS="$SUBAGENT_COUNT"
-OTHER_MACHINES=""
 
 if [ -d "$MACHINE_STATS_DIR" ]; then
   # Write local stats (throttled)
@@ -291,7 +290,7 @@ if [ -d "$MACHINE_STATS_DIR" ]; then
   if [ ! -f "$MACHINE_STATS_FILE" ]; then
     should_write=1
   else
-    file_age=$(( $(date +%s) - $(stat -f %m "$MACHINE_STATS_FILE" 2>/dev/null || stat -c %Y "$MACHINE_STATS_FILE" 2>/dev/null || echo 0) ))
+    file_age=$(( $(date +%s) - $(stat -c %Y "$MACHINE_STATS_FILE" 2>/dev/null || stat -f %m "$MACHINE_STATS_FILE" 2>/dev/null || echo 0) ))
     [ "$file_age" -gt "$machine_stats_max_age" ] && should_write=1
   fi
   if [ "$should_write" -eq 1 ]; then
@@ -311,7 +310,6 @@ if [ -d "$MACHINE_STATS_DIR" ]; then
     if [ "$m" != "$MACHINE_NAME" ]; then
       TOTAL_SESSIONS=$((TOTAL_SESSIONS + s))
       TOTAL_SUBAGENTS=$((TOTAL_SUBAGENTS + a))
-      OTHER_MACHINES="${OTHER_MACHINES}${OTHER_MACHINES:+, }${m}:${s}/${a}"
     fi
   done
   set -f
@@ -721,14 +719,9 @@ printf "${RED}⛯${RESET} ${WHITE}ENV:${RESET} ${BLUE}CC:${CC_VERSION}${RESET}${
 # MEMORY
 printf "${MAGENTA}◎${RESET} ${WHITE}MEMORY:${RESET} ${WHITE}${LEARNING_COUNT}${RESET}${DIM} learnings${RESET}"
 [ -n "$COST_TODAY" ] && printf "${SEP}${MAGENTA}${COST_TODAY}${RESET}${DIM} today${RESET}"
-if [ -n "$OTHER_MACHINES" ]; then
-  printf "${SEP}${WHITE}${TOTAL_SESSIONS}${RESET}${DIM} sessions${RESET}${DIM} (${MACHINE_NAME}:${SESSION_COUNT}${RESET}"
-  printf "${DIM}, ${OTHER_MACHINES})${RESET}"
-else
-  printf "${SEP}${WHITE}${SESSION_COUNT}${RESET}${DIM} sessions${RESET}"
-fi
+printf "${SEP}${WHITE}${TOTAL_SESSIONS}${RESET}${DIM} sessions${RESET}"
 if [ "$TOTAL_SUBAGENTS" -gt 0 ] 2>/dev/null; then
-  printf "${SEP}${WHITE}${TOTAL_SUBAGENTS}${RESET}${DIM} subagents${RESET}"
+  printf "${SEP}${WHITE}${TOTAL_SUBAGENTS}${RESET}${DIM} subagent sessions${RESET}"
 fi
 printf "\n"
 

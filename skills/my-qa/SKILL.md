@@ -3,6 +3,10 @@ name: my-qa
 description: Use when you need to QA a running web app — launches a browser, explores pages, finds bugs, and generates regression tests for issues found. Also use for "QA the app", "test the UI", "browser test", or "find bugs in the frontend".
 argument-hint: "< page/flow to test | URL override | (no arg: discover all) >"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent
+gate:
+  type: cooldown
+  duration: 10m
+  reason: "Launches browser, explores all pages, runs tests. Re-running on unchanged app wastes browser resources and tokens."
 ---
 
 # QA — Browser Testing with Bug Detection and Regression Tests

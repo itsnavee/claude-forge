@@ -3,6 +3,10 @@ name: my-generate-tests
 description: Use when existing code lacks tests — analyzes functions, branches, and edge cases then generates comprehensive test suites. Also use for "write tests", "add test coverage", "generate tests for this", or "backfill tests".
 argument-hint: "< file path | directory | function name >"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(npx:*), Bash(pytest:*), Bash(node:*), Bash(python3:*), Bash(go:*), Bash(cargo:*), Agent
+gate:
+  type: cooldown
+  duration: 10m
+  reason: "Analyzes entire files/directories and generates test suites. Re-running on unchanged code produces duplicate tests."
 ---
 
 # Generate Tests for Existing Code

@@ -21,6 +21,12 @@ if [ "$PWD" = "$HOME" ]; then
   exit 0
 fi
 
+# Skip for claude-config repo (config repo, not a project)
+REPO_NAME=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null)
+if [ "$REPO_NAME" = "claude-config" ]; then
+  exit 0
+fi
+
 # Skip for public repos (session summaries can contain sensitive context)
 source ~/.claude/hooks/is-public-repo.sh
 if [ "$IS_PUBLIC_REPO" = "yes" ]; then

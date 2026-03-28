@@ -108,7 +108,7 @@ End your response with a JSON code block tagged `research-result`:
   "views": null,
   "improvements": [
     {
-      "target": "my-project|my-project|my-project|my-project|my-project|boilerplate-webapp|my-project|cli-coding-setup",
+      "target": "my-project-2|my-project-6|my-project-3|my-project-4|my-project-5|boilerplate-webapp|my-project|cli-coding-setup",
       "title": "Descriptive title",
       "gap": "Specific gap addressed",
       "insight": "Why it matters, 2-4 sentences",
@@ -129,7 +129,7 @@ End your response with a JSON code block tagged `research-result`:
   "side_income": [],
   "content_ideas": [],
   "article": null,
-  "affected": ["my-project", "agent-architecture"],
+  "affected": ["my-project-2", "agent-architecture"],
   "repo_summary": {
     "key_features": ["feature 1", "feature 2"],
     "architecture": "Single Go binary + Redis. Agents = Python workers.",
@@ -143,7 +143,7 @@ End your response with a JSON code block tagged `research-result`:
 
 **Note:** GitHub repos do NOT get saved as articles (`article: null`). They go to global mapping only.
 
-**Repo summary:** The `repo_summary` field is written by the main agent to `~/code/github/my-project/research/repos.md` — a persistent registry of all researched repos with enough detail to avoid re-fetching. Always populate this field for repos with status `researched`.
+**Repo summary:** The `repo_summary` field is written by the main agent to `~/code/github/second-brain/research/repos.md` — a persistent registry of all researched repos with enough detail to avoid re-fetching. Always populate this field for repos with status `researched`.
 
 **Fallback:** If you cannot produce JSON, describe findings in prose with clear section headings. Main agent will extract.
 
@@ -160,3 +160,19 @@ Use `[]` for dimensions with no matches.
 - Keep README analysis concise (5-15 lines) — focus on architecture, patterns, integration
 - Note if the repo is archived, unmaintained (no commits in 6+ months), or < 100 stars
 - User annotations (`<<` text) contain classification hints — use them
+
+## Scope Boundaries
+
+### IN SCOPE
+- Fetching repo metadata via `gh` CLI (read-only: `gh repo view`, `gh api`)
+- Reading READMEs, file trees via GitHub API
+- Classifying repos against owner context
+- Producing structured research-result JSON
+
+### OUT OF SCOPE — NEVER
+- Starring, forking, cloning, or modifying any GitHub repos
+- Creating issues, PRs, comments, or releases on any repo
+- Writing files to disk (return data inline only)
+- Accessing private repos not already authenticated
+- Modifying agent, skill, or hook definitions
+- Running any git commands that modify local state

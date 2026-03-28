@@ -3,6 +3,10 @@ name: my-code-gaps-fix
 description: Use when you want to find and fix gaps in the codebase — dispatches all agent personalities to audit code against CLAUDE.md guardrails and acceptance criteria, documents gaps with fix suggestions, then implements fixes. Also use for "audit the code", "find gaps", or "check against criteria".
 argument-hint: "< security | services/api | frontend | (no arg: full audit) >"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent
+gate:
+  type: cooldown
+  duration: 20m
+  reason: "Dispatches all agent personalities for full codebase audit + implements fixes. Extremely token-heavy. Re-run only after significant code changes."
 ---
 
 # Code Gaps — Find and Fix

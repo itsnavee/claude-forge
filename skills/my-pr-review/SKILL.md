@@ -3,6 +3,10 @@ name: my-pr-review
 description: Use when a PR needs thorough review — dispatches 6 specialized agents (silent failures, type design, simplification, test gaps, comment analysis, general review) in parallel. Also use for "review this PR", "review PR #123", or "deep review".
 argument-hint: "< PR number | branch name | file paths >"
 allowed-tools: Read, Glob, Grep, Bash(git:*), Bash(gh:*), Agent
+gate:
+  type: cooldown
+  duration: 10m
+  reason: "Dispatches 6 parallel agents. Re-running on the same PR without new commits produces identical findings."
 ---
 
 # Specialized PR Review

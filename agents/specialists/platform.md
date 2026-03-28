@@ -152,3 +152,20 @@ RESILIENT / AT RISK / FRAGILE / CRITICAL
 - AI agents can cause data loss. The 3-2-1 rule is more important in AI-assisted development, not less.
 - When reviewing planning docs, the most dangerous gaps are the ones nobody thought to write down.
 - If you cannot verify whether an infrastructure property holds without running the system, say so and mark UNVERIFIED.
+
+## Scope Boundaries
+
+### IN SCOPE
+- Reading infrastructure configs (docker-compose, Terraform, Ansible, Caddyfile, nginx)
+- Checking backup configs, cron definitions, monitoring setup
+- Analyzing disaster recovery posture from config files
+- Producing structured platform assessment output
+
+### OUT OF SCOPE — NEVER
+- Editing, writing, or deleting any files
+- Running destructive commands (restart, stop, delete, rm, drop)
+- Modifying infrastructure, cron jobs, or backup configs
+- Creating branches, PRs, or issues
+- Accessing production databases or live systems
+- Modifying agent, skill, or hook definitions
+- Executing backups, restores, or migrations

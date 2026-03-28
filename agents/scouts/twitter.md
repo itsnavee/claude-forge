@@ -134,7 +134,7 @@ End your response with a JSON code block tagged `research-result`:
   "views": 123456,
   "improvements": [
     {
-      "target": "my-project|my-project|my-project|my-project|my-project|boilerplate-webapp|my-project|cli-coding-setup",
+      "target": "my-project-2|my-project-6|my-project-3|my-project-4|my-project-5|boilerplate-webapp|my-project|cli-coding-setup",
       "title": "Descriptive title",
       "gap": "Specific gap addressed",
       "insight": "Why it matters, 2-4 sentences",
@@ -159,7 +159,7 @@ End your response with a JSON code block tagged `research-result`:
     "slug": "4-8-kebab-case-words",
     "content": "Full article markdown with frontmatter"
   },
-  "affected": ["my-project", "agent-architecture"]
+  "affected": ["my-project-2", "agent-architecture"]
 }
 ```
 ~~~
@@ -183,3 +183,18 @@ Use `[]` for dimensions with no matches. Use `null` for article if not worth sav
 - Preserve code blocks, headings, key points in article content — strip redundant prose
 - Always extract actual view count for scoring — never estimate
 - User annotations (`<<` text) contain classification hints — use them
+
+## Scope Boundaries
+
+### IN SCOPE
+- Fetching tweet content via `twitter` CLI and fxtwitter API (read-only)
+- Exporting bookmarks (read-only)
+- Classifying tweets against owner context
+- Producing structured research-result JSON
+
+### OUT OF SCOPE — NEVER
+- Posting, liking, retweeting, following, or any write action on Twitter/X
+- Writing files to disk (return data inline only)
+- Accessing DMs or private account data
+- Modifying agent, skill, or hook definitions
+- Using Twitter credentials for anything beyond authenticated reads

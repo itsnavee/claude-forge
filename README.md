@@ -24,7 +24,7 @@
   <img src="https://img.shields.io/badge/skills-49-blue?style=flat-square" alt="49 Skills">
   <img src="https://img.shields.io/badge/agents-12-green?style=flat-square" alt="12 Agents">
   <img src="https://img.shields.io/badge/hooks-22-orange?style=flat-square" alt="22 Hooks">
-  <img src="https://img.shields.io/github/license/itsnavee/claude-forge?style=flat-square" alt="License">
+  <img src="https://img.shields.io/github/license/youruser/claude-forge?style=flat-square" alt="License">
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey?style=flat-square" alt="Platform">
   <img src="https://img.shields.io/badge/Claude_Code-compatible-blueviolet?style=flat-square" alt="Claude Code Compatible">
   <img src="https://img.shields.io/badge/multi--machine-sync-9cf?style=flat-square" alt="Multi-Machine Sync">
@@ -78,18 +78,18 @@ Add to your `~/.claude/settings.json`:
 ```json
 {
   "projects": {
-    "github.com/itsnavee/claude-forge": {}
+    "github.com/youruser/claude-forge": {}
   }
 }
 ```
 
-Or simply tell Claude Code: *"Use https://github.com/itsnavee/claude-forge as my config repo"*
+Or simply tell Claude Code: *"Use https://github.com/youruser/claude-forge as my config repo"*
 
 ### Option 2: Manual setup
 
 ```bash
 # Clone
-git clone https://github.com/itsnavee/claude-forge.git
+git clone https://github.com/youruser/claude-forge.git
 cd claude-forge
 
 # Run setup (idempotent — safe to re-run)
@@ -580,7 +580,7 @@ otus remove-machine dev          # Unregister
 
 #### Sample Project Config
 
-Drop this at `infra/configs/otus.conf` in your project root. Here's a real example from [my-project](https://github.com/itsnavee/my-project):
+Drop this at `infra/configs/otus.conf` in your project root. Here's a real example from [my-project](https://github.com/youruser/my-project):
 
 ```bash
 # infra/configs/otus.conf — LocusGraph

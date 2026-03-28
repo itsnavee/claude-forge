@@ -2,6 +2,10 @@
 name: my-adversarial-review
 description: Use when code needs rigorous review before shipping — spawns skeptic/believer/referee agents in iterative rounds until findings converge to nitpicks. Use after implementing features, before merging PRs, or when the user asks for a "thorough review", "adversarial review", or "tear this apart".
 argument-hint: "< file path | directory | branch >"
+gate:
+  type: cooldown
+  duration: 25m
+  reason: "Spawns 3+ agents per round across multiple iterations. Re-running on unchanged code burns significant tokens with no new findings."
 ---
 
 # /my-adversarial-review — Iterative Adversarial Code Review

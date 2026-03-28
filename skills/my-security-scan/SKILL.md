@@ -3,6 +3,10 @@ name: my-security-scan
 description: Use when you need a security audit — runs SAST, dependency audit, secret detection, and STRIDE threat modeling on the current project. Also use for "security scan", "check for vulnerabilities", "audit security", or "find secrets".
 argument-hint: "< full | sast | deps | secrets | stride > [target path]"
 allowed-tools: Read, Glob, Grep, Bash(npx:*), Bash(pip:*), Bash(python3:*), Bash(pnpm:*), Bash(npm:*), Bash(cargo:*), Bash(go:*), Bash(semgrep:*), Bash(bandit:*), Bash(trivy:*), Bash(gitleaks:*), Bash(grep:*), Agent
+gate:
+  type: cooldown
+  duration: 20m
+  reason: "Runs multiple external tools (semgrep, bandit, trivy, gitleaks). Re-running on unchanged code wastes tokens and API calls."
 ---
 
 # Security Scanning

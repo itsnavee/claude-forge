@@ -58,7 +58,7 @@ The hook at `~/.claude/hooks/freeze-guard.sh` checks Edit and Write tool calls w
 
 - `/my-freeze src/api` → only files under `<cwd>/src/api/` can be edited
 - `/my-freeze .` → only files under the current working directory (still useful to prevent editing ~/.claude/ or other system files)
-- `/my-freeze ~/code/github/my-project/services/api` → absolute path, edits only in my-project's API service
+- `/my-freeze ~/code/github/my-project-2/services/api` → absolute path, edits only in my-project-2's API service
 
 ## Rules
 

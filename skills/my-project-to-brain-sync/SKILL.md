@@ -1,33 +1,33 @@
 ---
 name: my-project-to-brain-sync
-description: Use when you want to update the my-project knowledge base with this project's current state — exports or updates the project summary at my-project/projects/<name>.md. Run from any project root. Also use for "sync to brain", "update project summary", or "export to my-project".
+description: Use when you want to update the second-brain knowledge base with this project's current state — exports or updates the project summary at second-brain/projects/<name>.md. Run from any project root. Also use for "sync to brain", "update project summary", or "export to second-brain".
 argument-hint: "< notes or focus area | (no arg: full sync) >"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(git:*), Bash(gh:*), Agent
 ---
 
 # /my-project-to-brain-sync
 
-Export or update this project's summary in the my-project repo.
+Export or update this project's summary in the second-brain repo.
 
 **Must be run from a project root** (any directory inside a git repo under `~/code/github/` or `~/data/code/github/`).
 
 ## How It Works
 
-1. **Pull latest my-project** — `cd ~/code/github/my-project && git pull --rebase origin main`
+1. **Pull latest second-brain** — `cd ~/code/github/second-brain && git pull --rebase origin main`
 2. Detect project name from current working directory
-3. Check if `~/code/github/my-project/projects/<name>.md` exists
+3. Check if `~/code/github/second-brain/projects/<name>.md` exists
 4. If **no** → full initial indexing (create new summary)
 5. If **yes** → incremental update (sync recent changes)
-6. **Push changes** — after all writes are done, run the `/git-push` skill from `~/code/github/my-project/` to stage, commit, and push all changes
+6. **Push changes** — after all writes are done, run the `/git-push` skill from `~/code/github/second-brain/` to stage, commit, and push all changes
 
 ---
 
 ## Step -1: Pull Latest Second-Brain
 
-Before doing anything, pull the latest changes in the my-project repo to avoid conflicts:
+Before doing anything, pull the latest changes in the second-brain repo to avoid conflicts:
 
 ```bash
-cd ~/code/github/my-project && git pull --rebase origin main
+cd ~/code/github/second-brain && git pull --rebase origin main
 ```
 
 If this fails (e.g., uncommitted changes), stash them first (`git stash`), pull, then pop (`git stash pop`). If the pull fails due to network issues, warn the user but continue with the sync.
@@ -40,9 +40,9 @@ Then `cd` back to the original project directory to continue.
 
 ```
 Git root → derive project name:
-  ~/code/github/my-project/iphone_app/ → "my-project"
-  ~/code/github/my-project/ → "my-project"
-  ~/data/code/github/my-project/ → "my-project"
+  ~/code/github/my-project-3/iphone_app/ → "my-project-3"
+  ~/code/github/my-project-5/ → "my-project-5"
+  ~/data/code/github/my-project-6/ → "my-project-6"
 
 Logic: find git root, walk up to find the directory directly under ~/code/github/ or ~/data/code/github/
 ```
@@ -50,20 +50,20 @@ Logic: find git root, walk up to find the directory directly under ~/code/github
 Run: `git rev-parse --show-toplevel` to get repo root.
 Extract project name: the directory name directly under `code/github/`.
 
-Then check: does `~/code/github/my-project/projects/<name>.md` exist?
+Then check: does `~/code/github/second-brain/projects/<name>.md` exist?
 
 - Active projects live in `projects/<name>.md`
 - Inactive/archived projects live in `projects/archived/<name>.md`
 - Research, articles, and ideas live under `research/`
 - Per-project improvement suggestions live in `improvements/<name>.md`
 
-**If the brain repo doesn't exist at all** (`~/code/github/my-project/` missing or no `projects/` subdir), tell the user to set it up first and stop.
+**If the brain repo doesn't exist at all** (`~/code/github/second-brain/` missing or no `projects/` subdir), tell the user to set it up first and stop.
 
 ---
 
 ## Step 1 — Delegate Analysis to a Subagent
 
-After detecting the project and confirming the my-project repo is ready, launch a **single subagent** to do all the heavy reading, analysis, and writing.
+After detecting the project and confirming the second-brain repo is ready, launch a **single subagent** to do all the heavy reading, analysis, and writing.
 
 **Why a subagent:** Path A reads 11 data sources (git logs, source files, session summaries, docs, deps, MEMORY.md, etc.) which would flood the main agent's context. The subagent handles all I/O; the main agent stays lean.
 
@@ -72,7 +72,7 @@ After detecting the project and confirming the my-project repo is ready, launch 
 ```
 You are performing a brain-sync for the project: <project-name>
 Project repo path: <repo-path>
-Second-brain path: ~/code/github/my-project/
+Second-brain path: ~/code/github/second-brain/
 Existing summary: <"exists" | "does not exist">
 Last synced: <date from existing file, or "N/A">
 User notes: <any arguments passed to /brain-sync>
@@ -125,7 +125,7 @@ Before writing, spot-check:
 
 ### A4. Write the Summary
 
-Create `~/code/github/my-project/projects/<name>.md` with these sections IN ORDER (or `projects/archived/<name>.md` if the project is inactive). All required unless marked optional.
+Create `~/code/github/second-brain/projects/<name>.md` with these sections IN ORDER (or `projects/archived/<name>.md` if the project is inactive). All required unless marked optional.
 
 ```
 # <Project Name>
@@ -191,7 +191,7 @@ Repo path, CLAUDE.md, MEMORY.md, transcript count.
 
 ### A5. Update INDEX.md
 
-In `~/code/github/my-project/INDEX.md`:
+In `~/code/github/second-brain/INDEX.md`:
 - Add to Active Projects table (or Inactive/Archive table, linking to `projects/archived/<name>.md`)
 - Add column to Technology Matrix
 - Add to Cross-Project Patterns if applicable
@@ -199,12 +199,12 @@ In `~/code/github/my-project/INDEX.md`:
 
 ### A6. Update CLAUDE.md
 
-In `~/code/github/my-project/.claude/CLAUDE.md`:
+In `~/code/github/second-brain/.claude/CLAUDE.md`:
 - Add project name to Active Projects list
 
 ### A7. Update OWNER-CONTEXT.md
 
-In `~/code/github/my-project/OWNER-CONTEXT.md`:
+In `~/code/github/second-brain/OWNER-CONTEXT.md`:
 - Add or update the project's row in the projects table (name, stack, phase, top gaps)
 - This file is injected into research subagents — keeping it current ensures new research is classified against current project state
 
@@ -255,7 +255,7 @@ This is the most important step in an update. For every item currently in "What'
 
 - Don't rewrite the entire summary
 - Don't add phases for trivial commits ("occasional commit", typo fixes)
-- Don't modify the project's own repo — only write to `~/code/github/my-project/`
+- Don't modify the project's own repo — only write to `~/code/github/second-brain/`
 - Don't read full JSONL transcripts (too large) — use session summaries + MEMORY.md
 
 ---
@@ -294,19 +294,19 @@ After completing, briefly report:
 
 ## Final Step: Push Changes
 
-After all writes to the my-project repo are complete, `cd` to `~/code/github/my-project/` and invoke `/my-git-sync` to stage, commit, and push all changes. The commit message should reference the project that was synced (e.g., "brain-sync: update my-project summary").
+After all writes to the second-brain repo are complete, `cd` to `~/code/github/second-brain/` and invoke `/my-git-sync` to stage, commit, and push all changes. The commit message should reference the project that was synced (e.g., "brain-sync: update my-project-3 summary").
 
 ## Gotchas
 
-- Must be run from the project root, not from my-project — it reads the current project's files
+- Must be run from the project root, not from second-brain — it reads the current project's files
 - Overwrites the existing project summary — make sure the latest version is committed first
 
 ## Quick Help
 
-**What**: Exports current project's codebase into a structured summary at `~/code/github/my-project/projects/<name>.md`.
-**Direction**: Project repo → my-project (one-way). Never writes back to the project.
+**What**: Exports current project's codebase into a structured summary at `~/code/github/second-brain/projects/<name>.md`.
+**Direction**: Project repo → second-brain (one-way). Never writes back to the project.
 **Usage**:
 - `/my-project-to-brain-sync` — run from any project root
 - `/my-project-to-brain-sync focus on API changes` — with optional notes
 **Modes**: New project (Path A — full initial export) or existing (Path B — incremental update since last sync).
-**Also updates**: INDEX.md, CLAUDE.md, OWNER-CONTEXT.md in my-project repo.
+**Also updates**: INDEX.md, CLAUDE.md, OWNER-CONTEXT.md in second-brain repo.

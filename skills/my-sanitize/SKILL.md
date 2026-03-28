@@ -45,8 +45,8 @@ For each pattern, grep across all tracked files. Report:
 
 ```
 VIOLATION: pattern "my-project" found in:
-  skills/my-save/SKILL.md:115  — `my-project`, `claude-forge`, `claude-config`
-  hooks/session-summary.sh:25  — SKIP_REPOS=("claude-config" "my-project" "my-project" "my-project" "my-project")
+  skills/my-save/SKILL.md:115  — `my-project-4`, `claude-forge`, `claude-config`
+  hooks/session-summary.sh:25  — SKIP_REPOS=("claude-config" "second-brain" "my-project-6" "my-project-4" "my-project")
 ```
 
 Skip binary files. Skip `.git/`.

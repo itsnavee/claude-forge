@@ -3,6 +3,10 @@ name: my-research-targets
 description: Use when researching any list of URLs (GitHub repos, X posts, web articles) to find actionable improvements for active projects, CLI coding setup, learning topics, side income opportunities, and content ideas worth posting on X/LinkedIn. Also replaces my-get-x-bookmarks.
 argument-hint: "< URL file path | inline URL | --bookmarks | (no arg: research/targets.md) >"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(gh:*), Bash(curl:*), Bash(python3:*), Bash(twitter:*), Bash(mkdir:*), Bash(rm:*), Bash(jq:*), WebFetch, Agent, Skill(my-git-sync)
+gate:
+  type: cooldown
+  duration: 20m
+  reason: "Dispatches multiple scout agents per URL, writes to second-brain. Re-running on same targets file produces duplicate entries."
 ---
 
 # Research Targets
@@ -12,7 +16,7 @@ Research any list of URLs — GitHub repos, X posts, web articles — then class
 ## Input
 
 The user provides one of:
-- A file path or inline URL list. Default: `~/code/github/my-project/research/targets.md`.
+- A file path or inline URL list. Default: `~/code/github/second-brain/research/targets.md`.
 - `--bookmarks` or `bookmarks` — auto-import from X bookmarks via twitter-cli (see Bookmark Mode below).
 
 **File parsing:** read the file, extract all URLs (one per line, skip lines starting with `#`, skip blank lines). **Preserve annotation text after `<<`** — pass it to the subagent as user context for classification.
@@ -52,20 +56,20 @@ Process URLs in **batches of 5**. For each batch:
 
 **Why disk persistence:** Results in memory get erased by context compaction after 3-5 batches. Cache is deleted after git sync.
 
-**Startup cleanup:** `rm -rf ~/code/github/my-project/research/.cache/ && mkdir -p ~/code/github/my-project/research/.cache/`
+**Startup cleanup:** `rm -rf ~/code/github/second-brain/research/.cache/ && mkdir -p ~/code/github/second-brain/research/.cache/`
 
 ---
 
 ## Step 1 — Load Global Mapping (dedup + re-analysis check)
 
-Read `~/code/github/my-project/research/mapping.md` and `~/code/github/my-project/research/read-next/mapping.md`.
+Read `~/code/github/second-brain/research/mapping.md` and `~/code/github/second-brain/research/read-next/mapping.md`.
 
 For each URL in the input list, check both mapping tables:
 
 **Not in mapping** → process as new (via subagent).
 
 **Already in mapping with a saved article** (status column is `saved→read-next`, filename present in read-next/mapping.md) → **re-analyse only**:
-- Spawn a subagent with the saved article content (loaded from `~/code/github/my-project/research/read-next/<filename>`) + project/topic context
+- Spawn a subagent with the saved article content (loaded from `~/code/github/second-brain/research/read-next/<filename>`) + project/topic context
 - Subagent skips fetching — classifies the existing content against all current dimensions
 - Subagent returns structured results; main agent writes any new entries
 - The skill has grown since it was first processed — new topics and dimensions may yield entries that didn't exist before
@@ -76,9 +80,9 @@ For each URL in the input list, check both mapping tables:
 
 ## Step 2 — Load Context (once, in main agent)
 
-Read `~/code/github/my-project/OWNER-CONTEXT.md` once. Inject its **full content** into every subagent's task prompt. It contains all active projects with gaps, explorations, coding setup, side income ideas, content strategy, and "What I'd Pay For" signals (~120 lines, replaces loading 14 separate files).
+Read `~/code/github/second-brain/OWNER-CONTEXT.md` once. Inject its **full content** into every subagent's task prompt. It contains all active projects with gaps, explorations, coding setup, side income ideas, content strategy, and "What I'd Pay For" signals (~120 lines, replaces loading 14 separate files).
 
-If a subagent needs deeper project context (rare), it should flag the need in its results and the main agent can verify by reading `~/code/github/my-project/projects/<name>.md`.
+If a subagent needs deeper project context (rare), it should flag the need in its results and the main agent can verify by reading `~/code/github/second-brain/projects/<name>.md`.
 
 ---
 
@@ -138,7 +142,7 @@ Each subagent receives: (1) scout agent file content, (2) URL or saved article c
 
 ## Step 7 — Update Global Mapping (main agent, after each batch)
 
-Append to `~/code/github/my-project/research/mapping.md` for each processed URL:
+Append to `~/code/github/second-brain/research/mapping.md` for each processed URL:
 
 ```
 | YYYY-MM-DD | <url> | <type> | <title> | <projects + topics affected, comma-separated | none> | <researched | reference-only | saved→read-next | fetch-failed> |
@@ -154,8 +158,8 @@ After all batches complete, print summary: total researched/re-analysed/skipped,
 
 ## Step 9 — Cleanup & Commit
 
-1. Delete the batch cache: `rm -rf ~/code/github/my-project/research/.cache/`
-2. Run `/my-git-sync` from `~/code/github/my-project/` with message: `"research: <N> targets — projects: <list>, topics: <list>"`
+1. Delete the batch cache: `rm -rf ~/code/github/second-brain/research/.cache/`
+2. Run `/my-git-sync` from `~/code/github/second-brain/` with message: `"research: <N> targets — projects: <list>, topics: <list>"`
 
 ---
 

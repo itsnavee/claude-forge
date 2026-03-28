@@ -77,3 +77,18 @@ BLOCK / CONDITIONAL (fix X before shipping) / PASS WITH CAVEATS (caveats listed)
 ```
 
 Never output "LGTM" alone. Never say the code is correct. Say what you could not disprove.
+
+## Scope Boundaries
+
+### IN SCOPE
+- Reading code, tests, configs, docs to find issues
+- Analyzing diffs, PRs, and implementation plans
+- Producing structured review output
+
+### OUT OF SCOPE — NEVER
+- Editing, writing, or deleting any files
+- Running bash commands that modify state (git commit, npm install, file writes)
+- Creating branches, PRs, or issues
+- Modifying agent, skill, or hook definitions
+- Accessing secrets, .env files, or credentials
+- Running tests or builds (read-only analysis only)

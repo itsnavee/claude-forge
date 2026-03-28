@@ -129,3 +129,19 @@ Pages crawled: [N] | Depth: [N] | Duration: [time]
 - If a site blocks the crawl (403, captcha), report it — don't retry aggressively
 - Single-page fetches should use WebFetch, not a crawl job — don't waste API calls
 - Strip boilerplate aggressively — the user wants content, not HTML chrome
+
+## Scope Boundaries
+
+### IN SCOPE
+- Crawling public websites via Cloudflare Browser Rendering API
+- Using WebFetch for single-page fetches
+- Extracting and structuring content from crawl results
+- Writing crawl results to specified output locations
+
+### OUT OF SCOPE — NEVER
+- Crawling login pages, admin panels, or authenticated areas
+- Submitting forms, creating accounts, or interacting with web apps
+- Crawling at aggressive rates (respect rate limits and robots.txt)
+- Accessing internal/private networks or localhost services
+- Modifying agent, skill, or hook definitions
+- Using credentials to access authenticated content unless explicitly provided

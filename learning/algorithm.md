@@ -13,6 +13,7 @@ Wrong approaches, over-engineering, missed requirements, process mistakes.
 
 
 
+
 ### 2026-03-18 — Cost optimizations at zero scale save zero dollars
 **Project**: my-project
 **Context**: Vetted 17 improvement candidates. 8 were cost optimization items (Moonshine STT, Telnyx migration, OTEL tracking, etc.) proposed before having any customers.
@@ -24,8 +25,9 @@ Wrong approaches, over-engineering, missed requirements, process mistakes.
 
 
 
+
 ### 2026-03-18 — Codebase reality check before planning
-**Project**: my-project
+**Project**: my-project-5
 **Context**: Planned 11 tasks but 4 were already implemented (wishlist, SKU display, order number, templates gallery, security audit)
 **Learning**: Always grep/search the codebase BEFORE adding tasks to a loop. Progress docs can be stale. The codebase is the source of truth.
 
@@ -33,10 +35,12 @@ Wrong approaches, over-engineering, missed requirements, process mistakes.
 
 
 
+
 ### 2026-03-21 — loop continuity
-**Project**: my-project
+**Project**: my-project-5
 **Context**: User pointed out I was stopping every 3-5 tasks to output summaries and wait for "continue"
 **Learning**: In /my-loop, don't pause between tasks for summaries. Execute continuously until the list is exhausted or context runs out. Checkpoint via git commits, not conversation pauses.
+
 
 
 
@@ -46,6 +50,7 @@ Wrong approaches, over-engineering, missed requirements, process mistakes.
 **Project**: my-project
 **Context**: Evaluated Hetzner LB vs CF LB for production. Hetzner LB requires VPS on private network but Hetzner has no managed NAT gateway — VPS can't make outbound API calls without a public IP or extra NAT VPS.
 **Learning**: CF Tunnel (free) + CF LB ($5/mo) is better: tunnel creates outbound-only connection, VPS keeps public IP but firewalls ALL inbound. Result: zero open ports + full outbound connectivity. Hetzner LB adds complexity for no security benefit.
+
 
 
 

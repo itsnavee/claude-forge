@@ -158,6 +158,15 @@
             "command": "~/.claude/hooks/freeze-guard.sh"
           }
         ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/skill-gate.sh"
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -167,6 +176,15 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/post-edit-format.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/skill-gate-log.sh"
           }
         ]
       }
