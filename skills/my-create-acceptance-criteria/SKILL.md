@@ -9,6 +9,8 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent
 
 **Announce at start:** "I'm using the my-create-acceptance-criteria skill to analyze all project docs and produce an acceptance criteria document."
 
+**Subagent return convention:** every `Agent` dispatch in this skill must append: `Return: plain markdown, <= 500 words, structured as a bulleted list of measurable criteria per feature. Do not restate the prompt or re-dump planning docs.` Caps cost per dispatch.
+
 ## Why This Skill Exists
 
 No project is built without acceptance criteria. LLMs generate what was described, not what was needed — and without measurable criteria defined upfront, there is no way to know whether the implementation is correct vs plausible-looking. This skill enforces that gate.

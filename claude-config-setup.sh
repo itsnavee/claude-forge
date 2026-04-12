@@ -107,13 +107,38 @@ else
   npm install -g @tobilu/qmd -q 2>/dev/null && echo "  new   qmd" && installed=$((installed + 1)) || echo "  WARN  qmd install failed (needs Node 22+)"
 fi
 
-# twitter-cli (X/Twitter fetcher)
-if command -v twitter &>/dev/null; then
-  echo "  skip  twitter-cli (already installed)"
-  skipped=$((skipped + 1))
-else
-  echo "  installing twitter-cli..."
-  uv tool install twitter-cli 2>/dev/null && echo "  new   twitter-cli" && installed=$((installed + 1)) || echo "  WARN  twitter-cli install failed (needs uv)"
+echo ""
+
+# Banned tools enforcement — reads banned-tools.yaml and uninstalls anything
+# listed. Runs on every setup so new machines are brought in line.
+# Uses \x1f as the field delimiter since check/uninstall values contain shell
+# pipes. See claude-config-sync.sh for the same parser.
+BANNED_FILE="$SCRIPT_DIR/banned-tools.yaml"
+if [ -f "$BANNED_FILE" ]; then
+  echo "Banned tools (uninstalling if present):"
+  US=$'\x1f'
+  awk -v us="$US" '
+    /^[[:space:]]*-[[:space:]]*name:/ { if (name) print name us check us uninstall us reason; name=""; check=""; uninstall=""; reason="" }
+    /^[[:space:]]*-[[:space:]]*name:/ { sub(/.*name:[[:space:]]*/, ""); name=$0 }
+    /^[[:space:]]*check:/ { sub(/.*check:[[:space:]]*/, ""); gsub(/^"|"$/, ""); check=$0 }
+    /^[[:space:]]*uninstall:/ { sub(/.*uninstall:[[:space:]]*/, ""); gsub(/^"|"$/, ""); uninstall=$0 }
+    /^[[:space:]]*reason:/ { sub(/.*reason:[[:space:]]*/, ""); gsub(/^"|"$/, ""); reason=$0 }
+    END { if (name) print name us check us uninstall us reason }
+  ' "$BANNED_FILE" > /tmp/.banned-tools-parsed.$$
+  while IFS="$US" read -r btool bcheck bunins breason; do
+    [ -z "$btool" ] && continue
+    if bash -c "$bcheck" </dev/null >/dev/null 2>&1; then
+      echo "  remove  $btool  — $breason"
+      if bash -c "$bunins" </dev/null >/dev/null 2>&1; then
+        echo "  ok      $btool uninstalled"
+      else
+        echo "  WARN    $btool uninstall failed — remove manually"
+      fi
+    else
+      echo "  skip    $btool (banned — not installed)"
+    fi
+  done < /tmp/.banned-tools-parsed.$$
+  rm -f /tmp/.banned-tools-parsed.$$
 fi
 
 echo ""

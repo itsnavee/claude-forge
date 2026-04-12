@@ -13,7 +13,7 @@ Fetches web article content and converts to clean markdown. Handles blogs, docum
 ## Usage
 
 - `/my-fetch-article https://example.com/blog/post` — fetch and display
-- Called by `/my-research-targets` for non-Twitter, non-GitHub URLs
+- Called by research pipelines for non-GitHub web URLs
 
 ## Fetch Strategy
 

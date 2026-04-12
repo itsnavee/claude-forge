@@ -91,7 +91,7 @@ Parse the argument. Match it against the lookup table below. Execute the matchin
 - **Minimal tokens**: For `current-session`, `memory`, individual skill/hook/agent files — just Read and print. Do not summarize unless the user asks.
 - **One Read call per item**: Don't chain multiple reads for a single lookup. If aggregating (e.g., `all-skills`), use parallel reads.
 - **No writes**: This skill is read-only. Never modify any file.
-- **Fuzzy matching**: If argument is `prompt`, match `my-prompt`. If `scout`, list both `twitter-scout` and `github-scout`. If `session-summary`, match the hook `session-summary.sh`.
+- **Fuzzy matching**: If argument is `prompt`, match `my-prompt`. If `scout`, list `github-scout`. If `session-summary`, match the hook `session-summary.sh`.
 - **Current project detection**: Use `git rev-parse --show-toplevel` to find project root for session/CLAUDE.md lookups.
 - **`help` argument convention**: Every skill has a `## Quick Help` section. When ANY skill is invoked with `help` as its argument (e.g., `/my-prompt help`, `/bug-hunt help`), read only the `## Quick Help` section from that skill's SKILL.md and print it. Do NOT execute the skill's main logic. This convention applies to ALL skills — `/my-show-info` is just one way to access it.
 

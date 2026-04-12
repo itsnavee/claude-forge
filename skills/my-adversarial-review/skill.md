@@ -12,6 +12,8 @@ gate:
 
 Spawns three adversarial agents (Skeptic, Believer, Referee) in iterative rounds. Each round narrows findings until the Skeptic can only find nitpicks — that's the convergence signal.
 
+**Subagent return convention:** every `Agent` dispatch in this skill must append: `Return: plain markdown, <= 500 words, structured with ## headers. Skeptic returns Findings/Severity; Believer returns Defense/Concessions; Referee returns Verdict/Action-items. Do not restate the prompt.` Caps cost per round.
+
 ## Behavior
 
 ### 1. Identify Scope

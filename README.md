@@ -144,22 +144,12 @@ claude-forge/
 │   ├── my-get-me-up2speed/         #   Cross-session work summary
 │   ├── my-prompt-history/          #   Show recent user prompts
 │   ├── my-show-info/               #   Quick lookup for setup info
-│   ├── my-fetch-tweet/             #   Twitter content fetcher
 │   ├── my-fetch-article/           #   Web article extractor
 │   ├── my-fetch-repo/              #   GitHub repo metadata fetcher
-│   ├── my-research-targets/        #   Research URLs for improvements
-│   ├── my-classify-content/        #   Classify content against projects
-│   ├── my-write-research-entries/  #   Write research to knowledge base
 │   ├── my-my-project-find-potential-improvements/
-│   ├── my-project-to-brain-sync/   #   Export project state to my-project
 │   ├── my-claude-config-sync/      #   Sync configs between machines
-│   ├── my-sync-all/                #   Pull all repos + config sync
-│   ├── my-update-boilerplate-webapp/  #   Sync components to template repo
 │   ├── my-self-improve/            #   Analyze session history for automation opportunities
 │   ├── my-sanitize/                #   Scan public repos for sensitive data before pushing
-│   ├── my-classify-content/        #   Classify content against projects
-│   ├── my-research-targets/        #   Research URLs for improvements
-│   ├── my-write-research-entries/  #   Write research to knowledge base
 │   ├── bug-hunt/                   #   Adversarial bug hunting
 │   └── webapp-testing/             #   Playwright browser interaction toolkit
 │
@@ -177,7 +167,6 @@ claude-forge/
 │   │   ├── platform.md             #     DR, backup compliance, cron durability
 │   │   └── frontend.md             #     Core Web Vitals, React patterns
 │   ├── scouts/                     #   External research
-│   │   ├── twitter.md              #     Twitter/X data fetcher
 │   │   └── github.md               #     GitHub repo researcher
 │   └── workers/                    #   Task execution
 │       └── crawler.md              #     Web crawler via Cloudflare Browser Rendering
@@ -270,7 +259,6 @@ The `CLAUDE.md` also enforces:
 |-------|------|-----|
 | `/my-git-sync` | Commit and push changes | Stages (never secrets), auto-generates commit message, co-author tags, pull with rebase, push. `pr` mode creates PRs, `clean` prunes merged branches |
 | `/my-loop` | Multiple tasks to execute | Per task: `/my-prompt` → codebase reality check → plan → build → self-review → docs → checkpoint. Auto-compacts at 200K tokens |
-| `/my-sync-all` | Update all projects at once | Git pull on all repos in `~/code/github/`, config sync, push. Per-repo status with graceful failure |
 | `/my-claude-config-sync` | Sync configs between machines | Bidirectional sync: repo ↔ `~/.claude/`. Append-merge for learning files |
 
 ### Review & Quality
@@ -309,12 +297,7 @@ The `CLAUDE.md` also enforces:
 |-------|------|-----|
 | `/my-fetch-article` | Fetch a web article | Extracts clean markdown from blogs, docs, PDFs, arxiv. Strips nav/ads/tracking |
 | `/my-fetch-repo` | Research a GitHub repo | Metadata (stars, license, activity), README, file tree via `gh` CLI |
-| `/my-fetch-tweet` | Fetch a tweet | Fallback chain: `twitter-cli` → fxtwitter → xcancel. Text, metrics, linked articles, thread detection |
-| `/my-classify-content` | Classify fetched content | Produces structured research-result JSON against active projects, topics, opportunities |
-| `/my-research-targets` | Research a list of URLs | Batch process URLs (repos, tweets, articles). Dispatches parallel subagents, writes to knowledge base |
-| `/my-write-research-entries` | Write classified results to files | Handles dedup, formatting, mapping updates for improvements/, topics/, drafts/ |
 | `/my-my-project-find-potential-improvements` | Find improvements from research | Cross-references project gaps with saved articles, filters against existing implementations |
-| `/my-project-to-brain-sync` | Export project state to knowledge base | Updates `my-project/projects/<name>.md` with current architecture, decisions, status |
 
 ### Meta & Infrastructure
 
@@ -328,7 +311,6 @@ The `CLAUDE.md` also enforces:
 | `/my-llm-dev` | Building LLM-powered features | Guided patterns for RAG, embeddings, prompt engineering, evals, agent architecture |
 | `/my-show-info` | Quick setup lookup | Read-only: skills, hooks, agents, sessions, settings, plugins with fuzzy matching |
 | `/my-statusline` | Change statusline display | Switches between mini (compact), max (full), or none (disabled) |
-| `/my-update-boilerplate-webapp` | Sync improvements back to template | Pushes components, theme, layout, infra changes from project to boilerplate-webapp repo |
 | `/webapp-testing` | Interact with a running web app | Playwright toolkit: server lifecycle, SPA support, screenshots, DOM inspection |
 
 ---
@@ -365,7 +347,6 @@ The `CLAUDE.md` also enforces:
 
 | Agent | When | How | Model |
 |-------|------|-----|-------|
-| **Twitter** | Fetching tweets, bookmarks | Twitter/X data via `twitter-cli`. Bookmarks, tweets, search, thread detection | Haiku |
 | **GitHub** | Researching repos | Metadata, READMEs, file trees via `gh` CLI | Haiku |
 
 ### Workers — task execution
@@ -445,7 +426,6 @@ Also installs these dependencies (skips if already present):
 | [**rtk**](https://github.com/rtk-ai/rtk) | Token compression proxy — rewrites CLI output for 60-90% savings on `git`, `ls`, `find` |
 | [**playwright**](https://playwright.dev/) | Browser automation for `/my-qa`, `/my-smoke-test`, and `/webapp-testing` skills |
 | [**qmd**](https://github.com/tobi/qmd) | Semantic search across markdown files and session history (BM25 + embeddings + LLM re-ranking) |
-| [**twitter-cli**](https://github.com/jackwener/twitter-cli) | Terminal Twitter/X fetcher for `/my-fetch-tweet` and research workflows |
 
 ```bash
 ./claude-config-setup.sh
@@ -453,7 +433,6 @@ Also installs these dependencies (skips if already present):
 #   skip  rtk 0.4.2 (already installed)
 #   new   playwright
 #   new   qmd
-#   new   twitter-cli
 #   new   skills/my-save/SKILL.md
 #   new   hooks/pre-git-add-guard.sh
 #   skip  CLAUDE.md (already exists)
@@ -778,7 +757,6 @@ This project was built on the shoulders of excellent open-source work and resear
 | Project | What We Adopted |
 |---------|----------------|
 | [**lightpanda**](https://github.com/lightpanda-io/browser) | Self-hosted browser rendering — replaced Cloudflare Browser API, 9x less memory, CDP-compatible |
-| [**twitter-cli**](https://github.com/jackwener/twitter-cli/) | Terminal CLI for Twitter/X discovery, bookmark fetching, and search |
 | [**clorch**](https://github.com/androsovm/clorch) | Session history visualization and cost tracking patterns |
 
 ---

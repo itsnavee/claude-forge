@@ -433,6 +433,44 @@ for proj_name in $(echo "$project_names" | tr ' ' '\n' | sort -u); do
   fi
 done
 
+# --- Banned tools enforcement (runs every sync on every machine) ---
+section "Banned Tools"
+BANNED_FILE="$SCRIPT_DIR/banned-tools.yaml"
+if [ -f "$BANNED_FILE" ]; then
+  # Parse YAML with awk. IMPORTANT: we use \x1f (ASCII Unit Separator) as the
+  # field delimiter instead of `|` because the check/uninstall values contain
+  # shell pipes (`uv tool list | grep ...`). Using `|` as delimiter would
+  # truncate commands and break everything. \x1f never appears in shell code.
+  # Stdin redirection is also disabled on `eval` with `</dev/null` so the
+  # uninstall command can't accidentally consume lines from the read loop.
+  US=$'\x1f'
+  awk -v us="$US" '
+    /^[[:space:]]*-[[:space:]]*name:/ { if (name) print name us check us uninstall us reason; name=""; check=""; uninstall=""; reason="" }
+    /^[[:space:]]*-[[:space:]]*name:/ { sub(/.*name:[[:space:]]*/, ""); name=$0 }
+    /^[[:space:]]*check:/ { sub(/.*check:[[:space:]]*/, ""); gsub(/^"|"$/, ""); check=$0 }
+    /^[[:space:]]*uninstall:/ { sub(/.*uninstall:[[:space:]]*/, ""); gsub(/^"|"$/, ""); uninstall=$0 }
+    /^[[:space:]]*reason:/ { sub(/.*reason:[[:space:]]*/, ""); gsub(/^"|"$/, ""); reason=$0 }
+    END { if (name) print name us check us uninstall us reason }
+  ' "$BANNED_FILE" > /tmp/.banned-tools-parsed.$$
+  while IFS="$US" read -r btool bcheck bunins breason; do
+    [ -z "$btool" ] && continue
+    if bash -c "$bcheck" </dev/null >/dev/null 2>&1; then
+      printf "  ${RED}%-7s${RESET}  %s  — %s\n" "remove" "$btool" "$breason"
+      if bash -c "$bunins" </dev/null >/dev/null 2>&1; then
+        printf "  ${GREEN}%-7s${RESET}  %s uninstalled\n" "ok" "$btool"
+      else
+        printf "  ${YELLOW}%-7s${RESET}  %s uninstall failed — remove manually\n" "warn" "$btool"
+      fi
+      purged=$((purged + 1))
+    else
+      printf "  ${DIM}%-7s${RESET}  %s  (not present)\n" "ok" "$btool"
+    fi
+  done < /tmp/.banned-tools-parsed.$$
+  rm -f /tmp/.banned-tools-parsed.$$
+else
+  printf "  ${DIM}%-7s${RESET}  no banned-tools.yaml\n" "skip"
+fi
+
 # --- Fix plugin hook permissions ---
 section "Plugin Permissions"
 plugin_fixed=0

@@ -15,6 +15,12 @@ INPUT=$(cat)
 SKILL=$(echo "$INPUT" | jq -r '.tool_input.skill // empty' 2>/dev/null)
 [[ -z "$SKILL" ]] && exit 0
 
+# ClaudeForge announce: print the skill being used so the model and user
+# both see it without relying on the model remembering to say it.
+# Goes to stderr so Claude Code surfaces it alongside tool output.
+ARGS=$(echo "$INPUT" | jq -r '.tool_input.args // empty' 2>/dev/null | head -c 80)
+echo "⚡ ClaudeForge: Using /${SKILL}${ARGS:+ — $ARGS}" >&2
+
 # Cooldown map: skill_name -> seconds
 # Update these when skill frontmatter changes
 declare -A COOLDOWNS=(

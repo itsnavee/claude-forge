@@ -16,8 +16,11 @@ if [ "$STOP_HOOK_ACTIVE" = "true" ]; then
   exit 0
 fi
 
-# Skip if running from home directory (no project context)
-if [ "$PWD" = "$HOME" ]; then
+# Refuse to write a session summary when cwd is / or $HOME — writing would
+# produce paths like //.claude/sessions/... or ~/.claude/sessions/... which
+# pollute the global tree and obscure which project the session belongs to.
+if [ "$PWD" = "$HOME" ] || [ "$PWD" = "/" ]; then
+  echo "session-summary: refusing to write from cwd=$PWD (no project context)" >&2
   exit 0
 fi
 

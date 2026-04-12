@@ -10,7 +10,12 @@
   "permissions": {
     "allow": [
       "mcp__pencil",
-      "Write(.claude/sessions/**)"
+      "Write(**/.claude/**)",
+      "Edit(**/.claude/**)",
+      "Read(**/.claude/**)",
+      "Write($HOME/.claude/**)",
+      "Edit($HOME/.claude/**)",
+      "Read($HOME/.claude/**)"
     ],
     "deny": []
   },
@@ -39,6 +44,22 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/timestamp.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/user-prompt-signals.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -n \"$SUPERSET_HOME_DIR\" ] && [ -x \"$SUPERSET_HOME_DIR/hooks/notify.sh\" ] && \"$SUPERSET_HOME_DIR/hooks/notify.sh\" || true"
           }
         ]
       }
@@ -90,12 +111,100 @@
         "hooks": [
           {
             "type": "command",
+            "command": "~/.claude/hooks/consolidate-on-stop.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
             "command": "~/.claude/hooks/cost-tracker.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -n \"$SUPERSET_HOME_DIR\" ] && [ -x \"$SUPERSET_HOME_DIR/hooks/notify.sh\" ] && \"$SUPERSET_HOME_DIR/hooks/notify.sh\" || true"
           }
         ]
       }
     ],
     "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/block-x-automation.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/block-cat-tracked.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/re-read-detector.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/block-raw-git-commit.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/tool-use-cap.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__pencil__get_variables",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/pencil-limits.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__pencil__get_screenshot",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/pencil-limits.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "WebSearch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/websearch-gate.sh"
+          }
+        ]
+      },
       {
         "matcher": "Bash",
         "hooks": [
@@ -171,6 +280,15 @@
     ],
     "PostToolUse": [
       {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/tool-use-counter.sh"
+          }
+        ]
+      },
+      {
         "matcher": "Edit",
         "hooks": [
           {
@@ -185,6 +303,37 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/skill-gate-log.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -n \"$SUPERSET_HOME_DIR\" ] && [ -x \"$SUPERSET_HOME_DIR/hooks/notify.sh\" ] && \"$SUPERSET_HOME_DIR/hooks/notify.sh\" || true"
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -n \"$SUPERSET_HOME_DIR\" ] && [ -x \"$SUPERSET_HOME_DIR/hooks/notify.sh\" ] && \"$SUPERSET_HOME_DIR/hooks/notify.sh\" || true"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -n \"$SUPERSET_HOME_DIR\" ] && [ -x \"$SUPERSET_HOME_DIR/hooks/notify.sh\" ] && \"$SUPERSET_HOME_DIR/hooks/notify.sh\" || true"
           }
         ]
       }

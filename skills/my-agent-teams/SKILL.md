@@ -86,7 +86,7 @@ Match model tier to task complexity. Use the `model` parameter on the Agent tool
 
 | Tier | Use for | Cost |
 |------|---------|------|
-| **haiku** | Verification, formatting, grep searches, simple transforms, scouts (twitter, github) | 10-20x cheaper |
+| **haiku** | Verification, formatting, grep searches, simple transforms, scouts (github) | 10-20x cheaper |
 | **sonnet** | Standard implementation, research, coding, code review, debate agents | Default |
 | **opus** | Architecture decisions, strategy, complex judgment, orchestration | Most expensive |
 
@@ -100,7 +100,6 @@ Match model tier to task complexity. Use the `model` parameter on the Agent tool
 | reviewers/code | sonnet |
 | reviewers/doc | haiku |
 | reviewers/security | sonnet |
-| scouts/twitter | haiku |
 | scouts/github | haiku |
 | specialists/architect | opus |
 | specialists/frontend | sonnet |

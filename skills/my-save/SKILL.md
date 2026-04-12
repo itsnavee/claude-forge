@@ -21,41 +21,19 @@ echo "PROJECT_ROOT=$PROJECT_ROOT"
 
 Use `$PROJECT_ROOT/.claude/sessions/`, `$PROJECT_ROOT/state.md`, `$PROJECT_ROOT/architecture.md`, etc. throughout. Never assume `pwd` is the project root.
 
-## Step 0b: Detect Agent Runtime
+## Step 0b: Resolve Session ID
 
-Run this bash command first to detect which agent you're running in:
+Get an 8-char session identifier from Claude Code's env var, falling back
+to a timestamp hash if it's not set:
 
 ```bash
 if [ -n "$CLAUDE_SESSION_ID" ]; then
-  echo "AGENT=claude"
-  echo "SESSION_ID=${CLAUDE_SESSION_ID:0:8}"
-elif [ -d "$HOME/.pi/agent" ] && pgrep -f "pi-coding-agent" >/dev/null 2>&1; then
-  echo "AGENT=pi"
-  echo "SESSION_ID=$(date +%s | shasum | head -c 8)"
-elif [ -n "$PI_CODING_AGENT_DIR" ]; then
-  echo "AGENT=pi"
-  echo "SESSION_ID=$(date +%s | shasum | head -c 8)"
+  SESSION_ID=${CLAUDE_SESSION_ID:0:8}
 else
-  # Fallback: check parent process name
-  PARENT=$(ps -o comm= -p $PPID 2>/dev/null || echo "")
-  if echo "$PARENT" | grep -qi "pi"; then
-    echo "AGENT=pi"
-  else
-    echo "AGENT=claude"
-  fi
-  echo "SESSION_ID=$(date +%s | shasum | head -c 8)"
+  SESSION_ID=$(date +%s | shasum | head -c 8)
 fi
+echo "SESSION_ID=$SESSION_ID"
 ```
-
-Detection priority:
-1. `CLAUDE_SESSION_ID` env var → Claude Code
-2. `~/.pi/agent` exists + pi process running → Pi
-3. `PI_CODING_AGENT_DIR` env var → Pi
-4. Parent process name check → fallback
-
-This sets two values you'll use throughout:
-- **AGENT** — `claude` or `pi`
-- **SESSION_ID** — 8-char identifier (Claude uses its session ID, Pi generates one from timestamp)
 
 ## Rules
 
@@ -65,12 +43,10 @@ This sets two values you'll use throughout:
 4. **Session ID** — use the SESSION_ID from Step 0
 5. **Be concise** — follow the format below strictly, no filler text
 
-> **Both agents save to `.claude/sessions/`** — this is intentional. Session history is shared so either agent can load context from the other's work.
-
 ## Format
 
 ```markdown
-## Session: <8-char session id> (via <claude|pi>)
+## Session: <8-char session id>
 **Topics:** tag1, tag2, tag3
 **Entities:** LibraryName, ServiceName, APIName
 **Importance:** 0.3 | 0.5 | 0.7 | 1.0
@@ -137,7 +113,6 @@ After writing the summary, sync all missing transcripts from `~/.claude/projects
    echo "Copied $COPIED new transcripts to $DEST_DIR"
    ```
 
-   - **Pi**: `mkdir -p "$PROJECT_ROOT/.claude/transcripts" && cp $(ls -t ~/.pi/agent/sessions/**/*.jsonl 2>/dev/null | head -1) "$PROJECT_ROOT/.claude/transcripts/" 2>/dev/null`
    - Silently skip if source directory doesn't exist or project is on skip list.
 
 ---
@@ -294,10 +269,9 @@ If the user passes arguments with `/save` or `/skill:my-save`, incorporate them 
 
 ## Quick Help
 
-**What**: Saves a session summary to `.claude/sessions/summary_YYYY-MM-DD.md`. Appends if today's file exists. Works in both Claude Code and Pi.
+**What**: Saves a session summary to `.claude/sessions/summary_YYYY-MM-DD.md`. Appends if today's file exists.
 **Usage**:
-- `/my-save` (Claude) or `/skill:my-save` (Pi) — auto-generates summary from conversation
+- `/my-save` — auto-generates summary from conversation
 - `/my-save focus on the auth refactor` — emphasizes specific topics
 **Also**: Creates `state.md` + `architecture.md` if missing (analyzes project to populate). Updates `state.md` on every save (last activity, resume point, completed tasks). Copies transcript to `.claude/transcripts/`. Triggers MEMORY.md consolidation when 5+ unconsolidated sessions accumulate.
 **Format**: Topics, entities, importance score, changes made, key decisions.
-**Agent tag**: Each session is tagged `(via claude)` or `(via pi)` so you can tell which agent wrote it.

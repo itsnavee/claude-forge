@@ -13,6 +13,8 @@ gate:
 
 Dispatch 6 focused review agents against a PR or set of changes. Each agent catches a different class of bug that generalist reviewers miss.
 
+**Subagent return convention:** every `Agent` dispatch in this skill must append: `Return: plain markdown, <= 500 words, structured with ## headers (Summary / Findings / Severity). Do not restate the prompt.` Caps cost per review agent.
+
 ## Quick Help
 
 **What**: Deep PR review using 6 specialized agents in parallel — finds silent failures, type design flaws, dead code, test gaps, and more.

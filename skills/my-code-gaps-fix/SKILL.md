@@ -13,6 +13,8 @@ gate:
 
 **Announce at start:** "I'm using the my-code-gaps-fix skill to audit the codebase against guardrails and fix what's found."
 
+**Subagent return convention:** every `Agent` dispatch in this skill must append: `Return: plain markdown, <= 500 words, structured with ## headers (Gaps / Severity / Fix hint). Do not restate the prompt or re-dump audited code.` Caps cost per audit agent.
+
 ## Why This Skill Exists
 
 Code drifts from its own rules. Acceptance criteria are defined upfront but implementations cut corners under time pressure — or the criteria existed after the code was written. CLAUDE.md guardrails state what correct code looks like, but nobody checks whether existing code meets them. This skill enforces that check and closes the loop by actually fixing what it finds.

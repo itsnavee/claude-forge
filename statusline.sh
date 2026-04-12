@@ -585,7 +585,7 @@ if $loc_needs_refresh; then
     # Extract numeric temperature
     LOC_TEMP_NUM=$(echo "$LOC_WEATHER" | grep -oP '[+-]?\d+' | head -1)
   else
-    LOC_CITY="Gujranwala, Pakistan"
+    LOC_CITY="<private>, Pakistan"
     LOC_WEATHER="?"
     LOC_TEMP_NUM=""
   fi

@@ -6,9 +6,7 @@ argument-hint: "< push | pull | diff | (no arg: bidirectional sync) >"
 
 # Claude Config Sync
 
-Sync agent configuration between the git repo and this host. The repo is always at `$HOME/code/github/claude-config/`.
-
-Supports both **Claude Code** (`~/.claude/`) and **Pi Coding Agent** (`~/.pi/agent/`). Auto-detects which are installed and syncs accordingly.
+Sync agent configuration between the git repo and this host. The repo is always at `$HOME/code/github/claude-config/`. Target is Claude Code at `~/.claude/`.
 
 ## What Gets Synced
 
@@ -27,15 +25,6 @@ Supports both **Claude Code** (`~/.claude/`) and **Pi Coding Agent** (`~/.pi/age
 | `learning/*.md` | Bidirectional | Cross-session learnings — **append-merge** (entries never overwritten) |
 | `context/*.md` | Bidirectional | Setup docs, environment notes |
 | `quotes.json` | Bidirectional | Quotes collection |
-
-### Pi Coding Agent (`~/.pi/agent/`)
-
-| Item | Direction | Notes |
-|------|-----------|-------|
-| `pi/settings.json` | Bidirectional | Pi settings (model, compaction, retry) |
-| `pi/extensions/*.ts` | Bidirectional | TypeScript extensions (session-hooks, etc.) |
-| `pi/skills/*/SKILL.md` | Bidirectional | Pi skills + helper scripts |
-| `pi/keybindings.json` | Bidirectional | Pi keybindings (if customized) |
 
 ### Claude Forge (`~/code/github/claude-forge`)
 
@@ -60,14 +49,7 @@ Public sanitized copy of claude-config. If the directory exists, changed files a
 
 2. **Git sync (pull latest)** — `cd` into `$HOME/code/github/claude-config/` and run `/my-git-sync` to pull the latest remote changes before syncing configs. This ensures the repo is up-to-date so bidirectional sync compares against the latest state. If there are no local changes to commit, it will just pull and push.
 
-3. **Detect installed agents** — run:
-   ```bash
-   echo "--- Agent Detection ---"
-   [ -d "$HOME/.claude" ] && echo "CLAUDE=yes" || echo "CLAUDE=no"
-   [ -d "$HOME/.pi/agent" ] && echo "PI=yes" || echo "PI=no"
-   ```
-
-4. **Claude Code sync** — if `~/.claude` exists:
+3. **Claude Code sync** — if `~/.claude` exists:
 
    a. **Setup (if needed)** — check if `~/.claude/settings.json` exists. If NOT, run setup first:
    ```bash
@@ -79,21 +61,9 @@ Public sanitized copy of claude-config. If the directory exists, changed files a
    bash "$HOME/code/github/claude-config/claude-config-sync.sh"
    ```
 
-5. **Pi Coding Agent sync** — if `~/.pi/agent` exists:
+4. **Report & push** — show the full sync output. If it reports repo changes (files pulled from host to repo), `cd` into `$HOME/code/github/claude-config/` and run `/my-git-sync` to commit and push the changes.
 
-   a. **Setup (if needed)** — check if `~/.pi/agent/extensions/session-hooks.ts` exists. If NOT, run setup first:
-   ```bash
-   bash "$HOME/code/github/claude-config/pi-config-setup.sh"
-   ```
-
-   b. **Sync** — always run bidirectional sync:
-   ```bash
-   bash "$HOME/code/github/claude-config/pi-config-sync.sh"
-   ```
-
-6. **Report & push** — show the full output from both syncs. If either reports repo changes (files pulled from host to repo), `cd` into `$HOME/code/github/claude-config/` and run `/my-git-sync` to commit and push the changes.
-
-7. **Claude-forge sync** — if `$HOME/code/github/claude-forge` exists:
+5. **Claude-forge sync** — if `$HOME/code/github/claude-forge` exists:
 
    a. **Copy shared files** from claude-config to claude-forge:
    ```bash
@@ -124,7 +94,7 @@ Public sanitized copy of claude-config. If the directory exists, changed files a
    - Private project names (my-project, my-project, etc.) → replace with `<private-project>`
    - `youruser` → `youruser`
    - `$HOME` or `$HOME` → `$HOME`
-   - `you@example.com` → `you@`
+   - `youruser@` → `you@`
    - API key patterns → `<redacted>`
 
    **Do NOT sanitize:** `sanitize-patterns.conf` itself (it's the reference), `.git/`, binary files.
@@ -161,20 +131,14 @@ Public sanitized copy of claude-config. If the directory exists, changed files a
 
 ```bash
 git clone <repo-url> "$HOME/code/github/claude-config"
-
-# Claude Code (if installed)
 bash "$HOME/code/github/claude-config/claude-config-setup.sh"
-
-# Pi Coding Agent (if installed — also installs pi if missing)
-bash "$HOME/code/github/claude-config/pi-config-setup.sh"
 ```
 
-Or just run `/my-claude-config-sync` (or `/skill:my-claude-config-sync` in Pi) — it detects what's installed and runs the right setup + sync automatically.
+Or just run `/my-claude-config-sync` — it runs setup if missing, then bidirectional sync.
 
 ## Quick Help
 
-**What**: Bidirectional sync for Claude Code, Pi Coding Agent, and claude-forge (sanitized public copy). Auto-detects what's installed.
-**Usage**: `/my-claude-config-sync` (Claude) or `/skill:my-claude-config-sync` (Pi) — no arguments needed.
-**Syncs**: CLAUDE.md, agents, skills, hooks, settings, extensions, project memories. If claude-forge exists, copies and sanitizes.
-**New machine**: Clone claude-config repo first, then run this skill to install everything.
-**Agents**: Syncs Claude Code if `~/.claude` exists, Pi if `~/.pi/agent` exists, claude-forge if `~/code/github/claude-forge` exists. Skips what's not installed.
+**What**: Bidirectional sync for Claude Code (`~/.claude/`) + optional forge mirror. Pi Coding Agent support was removed 2026-04-12.
+**Usage**: `/my-claude-config-sync` — no arguments needed.
+**Syncs**: CLAUDE.md, agents, skills, hooks, settings, project memories. If `~/code/github/claude-forge` exists, runs a sanitized one-way copy there.
+**New machine**: Clone claude-config repo first, then run this skill.

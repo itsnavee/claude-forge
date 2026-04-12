@@ -21,7 +21,6 @@ agents/
 │   ├── platform.md
 │   └── frontend.md
 ├── scouts/           # External research
-│   ├── twitter.md
 │   └── github.md
 └── workers/          # Task execution
     └── crawler.md
@@ -40,7 +39,6 @@ agents/
 | **Architect** | `specialists/architect.md` | opus | max | Data models, abstractions, service boundaries, scale, failure modes | SOUND / ACCEPTABLE / NEEDS REWORK / FUNDAMENTALLY WRONG |
 | **Platform** | `specialists/platform.md` | sonnet | high | 3-2-1 backup, DR, cron durability, cost bounds, operational continuity | RESILIENT / AT RISK / FRAGILE / CRITICAL |
 | **Frontend** | `specialists/frontend.md` | sonnet | high | Core Web Vitals, bundle size, rendering strategy, React patterns | PERFORMANT / ACCEPTABLE / NEEDS WORK / CRITICAL |
-| **Twitter Scout** | `scouts/twitter.md` | haiku | low | Twitter/X data fetcher using twitter-cli; bookmarks, tweets, search | JSON structured results |
 | **GitHub Scout** | `scouts/github.md` | haiku | low | GitHub repo researcher using gh CLI; metadata, READMEs, file trees | JSON structured results |
 | **Crawler** | `workers/crawler.md` | haiku | low | Web crawler via Cloudflare Browser Rendering API; extracts structured content | Crawl report with content map |
 
