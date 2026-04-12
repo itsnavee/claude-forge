@@ -21,9 +21,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/skills-49-blue?style=flat-square" alt="49 Skills">
-  <img src="https://img.shields.io/badge/agents-12-green?style=flat-square" alt="12 Agents">
-  <img src="https://img.shields.io/badge/hooks-22-orange?style=flat-square" alt="22 Hooks">
+  <img src="https://img.shields.io/badge/skills-39-blue?style=flat-square" alt="39 Skills">
+  <img src="https://img.shields.io/badge/agents-11-green?style=flat-square" alt="11 Agents">
+  <img src="https://img.shields.io/badge/hooks-31-orange?style=flat-square" alt="31 Hooks">
   <img src="https://img.shields.io/github/license/youruser/claude-forge?style=flat-square" alt="License">
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey?style=flat-square" alt="Platform">
   <img src="https://img.shields.io/badge/Claude_Code-compatible-blueviolet?style=flat-square" alt="Claude Code Compatible">
@@ -42,7 +42,7 @@ Claude Code is powerful out of the box, but after a few weeks of real project wo
 - **Manual repetition** — the same git, test, review workflows over and over
 - **No guardrails** — nothing stops it from committing `.env` files or running destructive commands
 
-**claude-forge** fixes all of this with 49 skills, 12 agents, and 22 hooks that work together as a coherent system.
+**claude-forge** fixes all of this with 39 skills, 11 agents, and 31 hooks that work together as a coherent system.
 
 ### Multi-Machine, Multi-User
 
@@ -111,7 +111,7 @@ claude-forge/
 ├── claude-config-sync.sh           # Bidirectional sync: repo ↔ ~/.claude/
 ├── sync-all.sh                     # Update all repos + config sync
 │
-├── skills/                         # 49 custom slash commands
+├── skills/                         # 39 custom slash commands
 │   ├── my-prompt/                  #   Transform rough ideas into disciplined prompts
 │   ├── my-loop/                    #   Multi-task execution with checkpoints
 │   ├── my-create-acceptance-criteria/  #   Generate measurable acceptance criteria
@@ -146,14 +146,13 @@ claude-forge/
 │   ├── my-show-info/               #   Quick lookup for setup info
 │   ├── my-fetch-article/           #   Web article extractor
 │   ├── my-fetch-repo/              #   GitHub repo metadata fetcher
-│   ├── my-my-project-find-potential-improvements/
 │   ├── my-claude-config-sync/      #   Sync configs between machines
 │   ├── my-self-improve/            #   Analyze session history for automation opportunities
 │   ├── my-sanitize/                #   Scan public repos for sensitive data before pushing
 │   ├── bug-hunt/                   #   Adversarial bug hunting
 │   └── webapp-testing/             #   Playwright browser interaction toolkit
 │
-├── agents/                         # 12 reusable agent personalities
+├── agents/                         # 11 reusable agent personalities
 │   ├── debate/                     #   Adversarial trio (always used together)
 │   │   ├── skeptic.md              #     Finds edge cases, race conditions, holes
 │   │   ├── believer.md             #     Argues for the approach with evidence
@@ -171,9 +170,9 @@ claude-forge/
 │   └── workers/                    #   Task execution
 │       └── crawler.md              #     Web crawler via Cloudflare Browser Rendering
 │
-├── hooks/                          # 19 event-driven scripts
-│   ├── session-start.sh            #   Load context on session init
-│   ├── session-summary.sh          #   Auto-save on session end
+├── hooks/                          # 31 event-driven scripts
+│   ├── session-start.sh            #   Load context on session init + cwd guard
+│   ├── session-summary.sh          #   Auto-save on session end (refuses cwd ∈ {/, $HOME})
 │   ├── usage-limit-resume.sh       #   Auto-resume on rate limit
 │   ├── cost-tracker.sh             #   Track spend per session
 │   ├── timestamp.sh                #   Event timestamps
@@ -188,7 +187,18 @@ claude-forge/
 │   ├── block-destructive.sh        #   Block rm -rf, force push, etc.
 │   ├── block-pip-install.sh        #   Prevent global pip installs
 │   ├── block-pkg-managers.sh       #   Guard package manager usage
-│   ├── protect-configs.sh          #   Prevent config overwrites
+│   ├── block-cat-tracked.sh        #   Nudge toward Read tool on source files
+│   ├── block-raw-git-commit.sh     #   Nudge toward /my-git-sync (COMMIT_BYPASS=1)
+│   ├── block-x-automation.sh       #   Block X/social-media CLIs and x.com URLs
+│   ├── consolidate-on-stop.sh      #   Auto-merge subdir project dirs at session end
+│   ├── pencil-limits.sh            #   Rate-limit pencil screenshot + nag-producing calls
+│   ├── re-read-detector.sh         #   Warn at 3+ reads of same file per session
+│   ├── websearch-gate.sh           #   Warn on broad (<3-term) WebSearch queries
+│   ├── user-prompt-signals.sh      #   Skill preprocessor + runbook detector + telemetry
+│   ├── skill-gate.sh               #   Skill cooldown + ClaudeForge announce
+│   ├── skill-gate-log.sh           #   Log skill invocations for telemetry
+│   ├── is-public-repo.sh           #   Helper: detect public/private repo for git workflows
+│   ├── protect-configs.sh          #   Prevent direct config overwrites
 │   ├── check-file-size.sh          #   Warn on large file creation
 │   ├── events-logger.sh            #   Log all hook events
 │   └── hook-gate.sh                #   Profile-based hook toggling
@@ -231,7 +241,7 @@ The `CLAUDE.md` also enforces:
 
 ## Skills
 
-48 slash commands covering the full development lifecycle. Each skill is a complete workflow, not a wrapper.
+39 slash commands covering the full development lifecycle. Each skill is a complete workflow, not a wrapper.
 
 ### Session & State
 
@@ -297,7 +307,6 @@ The `CLAUDE.md` also enforces:
 |-------|------|-----|
 | `/my-fetch-article` | Fetch a web article | Extracts clean markdown from blogs, docs, PDFs, arxiv. Strips nav/ads/tracking |
 | `/my-fetch-repo` | Research a GitHub repo | Metadata (stars, license, activity), README, file tree via `gh` CLI |
-| `/my-my-project-find-potential-improvements` | Find improvements from research | Cross-references project gaps with saved articles, filters against existing implementations |
 
 ### Meta & Infrastructure
 
@@ -317,7 +326,7 @@ The `CLAUDE.md` also enforces:
 
 ## Agents
 
-12 reusable agent personalities with model-tier dispatch. Each has an identity, evaluation dimensions, structured output format, and thinking effort level. Load via `Agent` tool with the `model` parameter for cost-effective dispatch.
+11 reusable agent personalities with model-tier dispatch. Each has an identity, evaluation dimensions, structured output format, and thinking effort level. Load via `Agent` tool with the `model` parameter for cost-effective dispatch.
 
 ### Debate Trio — always used together for adversarial review
 
@@ -359,7 +368,7 @@ The `CLAUDE.md` also enforces:
 
 ## Hooks
 
-21 event-driven scripts wired to Claude Code lifecycle events:
+31 event-driven scripts wired to Claude Code lifecycle events:
 
 ### Security Guardrails
 | Hook | What It Does |
@@ -372,15 +381,32 @@ The `CLAUDE.md` also enforces:
 | `careful-mode-guard.sh` | Enforces careful mode rules when activated via `/my-careful`. Pattern-matches against 30+ destructive command patterns including `git push --force`, `DROP TABLE`, `docker system prune` |
 | `protect-configs.sh` | Prevents Claude from editing `CLAUDE.md` or `settings.json` directly. Forces changes through the proper sync workflow |
 | `freeze-guard.sh` | Enforces directory-scoped edit locks set by `/my-freeze`. Blocks Edit/Write operations outside the frozen path |
-| `sanitize-public-repo.sh` | Intercepts `git push` on public repos. Scans unpushed commits for sensitive patterns (API keys, private project names, personal paths) and suspicious dotfiles (any `.file` or `.dir` not in the safe tooling allowlist). Configurable via `sanitize-patterns.conf` |
+| `sanitize-public-repo.sh` | Intercepts `git push` on public repos. Scans unpushed commits for sensitive patterns (API keys, private project names, personal paths) and suspicious dotfiles (any `.file` or `.dir` not in the safe tooling allowlist) |
+| `block-x-automation.sh` | Blocks third-party X/social-media CLIs and `x.com`/`twitter.com`/`t.co` URLs at PreToolUse — defensive guard against banned automation patterns |
+| `block-cat-tracked.sh` | Nudges toward the Read tool when `cat`/`head`/`tail`/`less`/`more` is invoked on git-tracked source files. Allows piped forms |
+| `block-raw-git-commit.sh` | Nudges toward `/my-git-sync` instead of bare `git commit` (which bypasses co-author tags and pre-flight checks). `COMMIT_BYPASS=1` overrides for skill-internal use |
 
 ### Session Management
 | Hook | What It Does |
 |------|-------------|
-| `session-start.sh` | Loads previous session context on startup — injects timestamp and session metadata |
-| `session-summary.sh` | Captures session summary on stop — what was done, decisions made, where to resume |
+| `session-start.sh` | Loads previous session context on startup, injects timestamp + session metadata, warns if launched from a non-canonical cwd (e.g., `~/data/code/github/*` instead of `~/code/github/*`) |
+| `session-summary.sh` | Captures session summary on stop — what was done, decisions made, where to resume. Refuses to write when cwd is `/` or `$HOME` (prevents polluting home with stray summaries) |
 | `pre-compact.sh` | Saves state before context compaction — ensures `state.md` is updated so context survives compression |
 | `usage-limit-resume.sh` | Detects rate limit stops and prepares resume context for the next session |
+| `consolidate-on-stop.sh` | At session end, merges `~/.claude/projects/-...-data-code-github-*` and subdir-based project dirs into their canonical repo-root dirs. Reads `project-renames.yaml` for explicit renames. Worktree-derived dirs are deleted unconditionally |
+
+### Discipline & Cost Control
+
+These hooks catch the patterns that quietly burn tokens or model focus across a long session.
+
+| Hook | What It Does |
+|------|-------------|
+| `re-read-detector.sh` | Tracks file reads per session. Warns at 3+ reads of the same file — usually a sign Claude lost context of what it already read and is re-fetching instead of using the prior result |
+| `websearch-gate.sh` | Warns when `WebSearch` is invoked with fewer than 3 query terms. Broad queries return 50+ hits and burn context; narrower queries return what you actually need |
+| `pencil-limits.sh` | Rate-limits expensive Pencil MCP calls. Blocks `mcp__pencil__get_variables` (which produces noisy nag text) entirely; rate-limits `mcp__pencil__get_screenshot` to 5 per session. `PENCIL_BYPASS=1` overrides |
+| `user-prompt-signals.sh` | Runs on `UserPromptSubmit`. Three things: (1) detects bare `/skill-name` references in prompts and injects a hint, (2) tracks repeated architecture-question keywords and suggests writing a runbook at 3 hits, (3) scans recent assistant turns for narration patterns and bumps a telemetry counter |
+| `skill-gate.sh` | Skill cooldown enforcement (per-skill rate limits) + `⚡ ClaudeForge: Using /<skill>` announce on every Skill invocation, so the user can see which skill fired |
+| `skill-gate-log.sh` | Logs every skill invocation to `~/.claude/cache/skill-log.jsonl` for telemetry and self-improvement analysis |
 
 ### Quality & Tracking
 | Hook | What It Does |
@@ -392,6 +418,7 @@ The `CLAUDE.md` also enforces:
 | `hook-gate.sh` | Routing logic for hook profiles — decides which hooks run based on `ECC_HOOK_PROFILE` |
 | `timestamp.sh` | Adds timestamps to all hook outputs for session replay |
 | `rtk-rewrite.sh` | Transparently rewrites CLI commands through RTK for token compression |
+| `is-public-repo.sh` | Helper sourced by `/my-git-sync` and `sanitize-public-repo.sh` to detect whether the current repo is public (selects co-author format and sanitization aggression) |
 
 ### Runtime Gating
 
