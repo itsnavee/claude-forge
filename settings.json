@@ -170,15 +170,6 @@
         ]
       },
       {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/tool-use-cap.sh"
-          }
-        ]
-      },
-      {
         "matcher": "mcp__pencil__get_variables",
         "hooks": [
           {
@@ -280,15 +271,6 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/tool-use-counter.sh"
-          }
-        ]
-      },
-      {
         "matcher": "Edit",
         "hooks": [
           {
@@ -341,7 +323,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "~/.claude/statusline.sh"
+    "command": "~/.claude/statusline-mini.sh"
   },
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true,

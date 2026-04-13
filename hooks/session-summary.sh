@@ -24,9 +24,9 @@ if [ "$PWD" = "$HOME" ] || [ "$PWD" = "/" ]; then
   exit 0
 fi
 
-# Skip for claude-config repo (config repo, not a project)
+# Skip for repos that don't need session summaries
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null)
-if [ "$REPO_NAME" = "claude-config" ]; then
+if [ "$REPO_NAME" = "claude-config" ] || [ "$REPO_NAME" = "my-project" ]; then
   exit 0
 fi
 

@@ -15,12 +15,10 @@ Wrong approaches, over-engineering, missed requirements, process mistakes.
 
 
 
-
 ### 2026-03-18 — Cost optimizations at zero scale save zero dollars
 **Project**: my-project
 **Context**: Vetted 17 improvement candidates. 8 were cost optimization items (Moonshine STT, Telnyx migration, OTEL tracking, etc.) proposed before having any customers.
 **Learning**: At 0 customers, cost optimization is pure waste. Deepgram at 100 onboardings = $0.22/month — the Docker sidecar RAM costs more. Defer cost work until reaching specific revenue triggers ($500/month Twilio, 20+ tenants for observability).
-
 
 
 
@@ -53,7 +51,6 @@ Wrong approaches, over-engineering, missed requirements, process mistakes.
 
 
 
-
 ### 2026-03-21 — CF Tunnel beats Hetzner LB for zero-inbound VPS
 **Project**: my-project
 **Context**: Evaluated Hetzner LB vs CF LB for production. Hetzner LB requires VPS on private network but Hetzner has no managed NAT gateway — VPS can't make outbound API calls without a public IP or extra NAT VPS.
@@ -71,16 +68,19 @@ Wrong approaches, over-engineering, missed requirements, process mistakes.
 **Learning**: Always search for existing MCP servers and tool integrations before writing custom browser automation. The ecosystem is growing fast — `uvx browser-use --mcp` and `lightpanda mcp` replaced weeks of custom CDP code with one-line installs.
 
 
+
 ### 2026-04-02 — Pencil MCP design-to-code workflow
 **Project**: my-project
 **Context**: First time converting a full Pencil .pen design to a Next.js template. Explored all 6 pages, read node trees, took screenshots, extracted variables.
 **Learning**: The effective workflow is: get_editor_state → get_variables → batch_get (readDepth 3-4, resolveInstances+resolveVariables) → get_screenshot for visual verification → implement in code. Don't try to read all pages at once — batch by 2-3 pages to avoid context overflow. Screenshots are essential for catching layout issues the node data won't reveal.
 
 
+
 ### 2026-04-02 — acceptance criteria before testing catches structural gaps
 **Project**: my-project/<private>
 **Context**: Ran <private> plugin tests on Apr 1 without acceptance criteria. Tests "passed" but missed: no file persistence, no scorecard verdict, fabricated frequency data. Created acceptance-criteria.md on Apr 2 — immediately surfaced 16 gaps.
 **Learning**: Write acceptance criteria BEFORE testing, not after. "It produced output" is not the same as "it produced correct output." The skeptic agent found 7 critical issues that manual testing missed because no one defined what "correct" meant.
+
 
 
 ### 2026-04-12 — Bash heredoc vs Edit for large-file appends

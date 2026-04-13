@@ -21,7 +21,7 @@
 #   1. /data/code/github/X twin of /code/github/X → merge data→code, rm data
 #   2. /data/code/github/X where ~/code/github/X is a git repo → rename to code-variant
 #   3. Any project dir whose encoded path maps to a subdir of a git repo
-#      (e.g. my-project <private> = my-project <private>  my-project is a git repo)
+#      (e.g. my-project-<private> = my-project/<private>, my-project is a git repo)
 #      → merge into the repo root's project dir, rm the subdir-based one
 #   4. True orphans (no matching repo anywhere) → leave alone, print warning
 # ============================================================================

@@ -14,10 +14,12 @@ Infrastructure, tooling, environment, and config issues.
 
 
 
+
 ### 2026-03-14 — session-start hook injecting 80 lines of context silently
 **Project**: claude-config
 **Context**: Token usage spiked after adding state.md/architecture.md pattern. Investigation found session-start hook was injecting last 80 lines of session summary into every new session, plus CLAUDE.md was loaded twice in claude-config repo.
 **Learning**: Audit hook output sizes periodically. Changed to opt-in model — hook reports availability, user runs /my-catchup when needed.
+
 
 
 
@@ -49,7 +51,6 @@ Infrastructure, tooling, environment, and config issues.
 
 
 
-
 ### 2026-03-27 — sudo changes $HOME, breaks relative paths in scripts
 **Project**: kubernetes-labs
 **Context**: SSH key path used `$HOME/.ssh/...` but script runs via `sudo`, so `$HOME` became `/root`
@@ -64,6 +65,7 @@ Infrastructure, tooling, environment, and config issues.
 **Project**: my-project/<private>
 **Context**: browser-use MCP tool schemas had oneOf/allOf/anyOf at top level, which Claude API rejects. Once the tool definition loaded, ALL requests failed — not just browser calls.
 **Learning**: MCP servers with invalid tool schemas crash the entire session. Test each MCP server in isolation after installing. The error "tools.N.custom.input_schema: does not support oneOf" means remove that MCP immediately. Playwright MCP is the replacement.
+
 
 
 ### 2026-04-12 — ROUTING.md rules are unenforced
