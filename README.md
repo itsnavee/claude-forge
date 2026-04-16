@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/skills-39-blue?style=flat-square" alt="39 Skills">
+  <img src="https://img.shields.io/badge/skills-40-blue?style=flat-square" alt="40 Skills">
   <img src="https://img.shields.io/badge/agents-11-green?style=flat-square" alt="11 Agents">
   <img src="https://img.shields.io/badge/hooks-31-orange?style=flat-square" alt="31 Hooks">
   <img src="https://img.shields.io/github/license/youruser/claude-forge?style=flat-square" alt="License">
@@ -42,7 +42,7 @@ Claude Code is powerful out of the box, but after a few weeks of real project wo
 - **Manual repetition** — the same git, test, review workflows over and over
 - **No guardrails** — nothing stops it from committing `.env` files or running destructive commands
 
-**claude-forge** fixes all of this with 39 skills, 11 agents, and 31 hooks that work together as a coherent system.
+**claude-forge** fixes all of this with 40 skills, 11 agents, and 31 hooks that work together as a coherent system.
 
 ### Multi-Machine, Multi-User
 
@@ -112,6 +112,7 @@ claude-forge/
 ├── sync-all.sh                     # Update all repos + config sync
 │
 ├── skills/                         # 39 custom slash commands
+│   ├── my-prd/                     #   Raw idea → structured PRD document
 │   ├── my-prompt/                  #   Transform rough ideas into disciplined prompts
 │   ├── my-loop/                    #   Multi-task execution with checkpoints
 │   ├── my-create-acceptance-criteria/  #   Generate measurable acceptance criteria
@@ -258,8 +259,9 @@ The `CLAUDE.md` also enforces:
 
 | Skill | When | How |
 |-------|------|-----|
+| `/my-prd` | Starting a new feature or project from a raw idea | Asks 3-5 targeted questions, produces structured PRD at `docs/prd-<slug>.md`. Sits upstream of `/my-prompt` |
 | `/my-prompt` | Before any significant coding task | Transforms rough ideas into structured prompts with acceptance criteria, anti-sycophancy directives, complexity budget |
-| `/my-create-acceptance-criteria` | Hard gate before implementation | 3 agents (Phase, Planning Doc, Gap Analysis) generate `docs/acceptance-criteria.md` with behavioral assertions, security + concurrency criteria |
+| `/my-create-acceptance-criteria` | Hard gate before implementation | 3 agents (Phase, Planning Doc, Gap Analysis) generate `docs/acceptance-criteria.md` with behavioral assertions, security + concurrency criteria. Includes Topic Scope Test gate |
 | `/my-office-hours` | Before committing to a design | Adversarial problem reframing — 5 Whys, 3+ alternatives scored by risk/complexity/reversibility |
 | `/my-review-docs` | Before implementation starts | 5 agent personalities (architect, security, platform, frontend, code) review `docs/` directory. Read-only |
 
