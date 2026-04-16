@@ -37,6 +37,22 @@ Before any file operations, resolve the git repo root. All project-relative path
 PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 ```
 
+## Step 0.5: Topic Scope Test
+
+Before gathering docs, validate that the scope is appropriately sized for a single acceptance criteria document.
+
+1. State the task or phase you are about to cover in **one sentence**.
+2. Check: does the sentence require "and" to join two **independent goals**?
+   - Compound nouns are fine: "search and replace", "drag and drop"
+   - Sequential steps of one goal are fine: "validate and save the form"
+   - Two independent goals are NOT fine: "build the auth system and add the billing page"
+3. **If it fails:** STOP. Print:
+   > **Topic Scope Test failed.** Your scope is: "<your sentence>".
+   >
+   > This covers multiple independent goals. Decompose first — run
+   > `/my-create-acceptance-criteria` on each piece separately.
+4. **If it passes:** Print the one-sentence scope and continue to Step 1.
+
 ## Step 1: Discover all project docs
 
 Scan the project for all planning and build documentation:
