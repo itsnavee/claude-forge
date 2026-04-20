@@ -22,6 +22,8 @@ Stage all changes, commit, pull with rebase, resolve any conflicts, and push. Op
 ### 1. Assess
 Run `git status` (never `-uall`) and `git diff --stat` to understand what changed.
 
+**Also check for remote changes:** Run `git fetch origin` and `git log HEAD..origin/<current-branch> --oneline` to see if there are upstream commits to pull. If the working tree is clean (nothing to stage/commit), skip Steps 2-3 and jump to Step 4 (Pull Rebase) — the sync should still pull remote changes and report them. Only stop early if there's nothing to commit AND nothing to pull.
+
 ### 2. Stage
 Add relevant files by name (NEVER `git add .` or `git add -A`). Never stage `.env`, credentials, secrets, `node_modules/`, `dist/`, `build/`, `.next/`, or other build artifacts. Warn if any are present.
 
