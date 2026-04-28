@@ -34,13 +34,13 @@ DOMAIN_PATTERN='(https?://|[[:space:]"'"'"'])(www\.)?(twitter\.com|x\.com|t\.co|
 if echo "$COMMAND" | grep -qiE "$BINARY_PATTERN"; then
   echo "X/Twitter automation is BANNED — prior use suspended the X account." >&2
   echo "No third-party fetcher is an acceptable substitute." >&2
-  echo "If you need content from a <item>, ask the user to paste it." >&2
+  echo "If you need content from a tweet, ask the user to paste it." >&2
   exit 2
 fi
 
 if echo "$COMMAND" | grep -qE "$CMD_POSITION_PATTERN"; then
   echo "X/Twitter automation is BANNED — \`twitter\` command detected at command position." >&2
-  echo "Ask the user to paste <item> content instead." >&2
+  echo "Ask the user to paste tweet content instead." >&2
   exit 2
 fi
 

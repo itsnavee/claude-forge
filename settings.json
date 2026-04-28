@@ -9,13 +9,13 @@
   },
   "permissions": {
     "allow": [
-      "mcp__pencil",
       "Write(**/.claude/**)",
       "Edit(**/.claude/**)",
       "Read(**/.claude/**)",
       "Write($HOME/.claude/**)",
       "Edit($HOME/.claude/**)",
-      "Read($HOME/.claude/**)"
+      "Read($HOME/.claude/**)",
+      "mcp__pencil"
     ],
     "deny": []
   },
@@ -337,6 +337,12 @@
     "ralph-loop@claude-plugins-official": true,
     "feature-dev@claude-plugins-official": true
   },
+  "effortLevel": "high",
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
+  },
+  "skipDangerousModePermissionPrompt": true,
   "voiceEnabled": true,
-  "skipDangerousModePermissionPrompt": true
+  "agentPushNotifEnabled": true
 }

@@ -44,6 +44,7 @@ Infrastructure, tooling, environment, and config issues.
 
 
 
+
 ### 2026-03-27 — cloud-init plain_text_passwd broken on Ubuntu Noble
 **Project**: kubernetes-labs
 **Context**: Setting up KVM VMs with cloud-init user-data, password auth failed despite correct config
@@ -55,10 +56,13 @@ Infrastructure, tooling, environment, and config issues.
 
 
 
+
+
 ### 2026-03-27 — sudo changes $HOME, breaks relative paths in scripts
 **Project**: kubernetes-labs
 **Context**: SSH key path used `$HOME/.ssh/...` but script runs via `sudo`, so `$HOME` became `/root`
 **Learning**: In scripts that run as root via sudo, hardcode user paths or use `SUDO_USER` to resolve the real home directory. Never rely on `$HOME` for the invoking user's files.
+
 
 
 
@@ -81,8 +85,10 @@ Infrastructure, tooling, environment, and config issues.
 
 
 
+
 ### 2026-04-14 — Amazon UK direct WebFetch returns HTTP 500/503 consistently
 **Project**: my-project (<private> skill)
 **Context**: Multiple sub-agents tried to fetch amazon.co.uk/dp/<ASIN> pages during deep-dive + price verification runs. 100% returned HTTP 500 or 503. CamelCamelCamel and Keepa both 403. Only reliable sources: brand direct sites, Google AI summaries (snippets), third-party retailers (John Lewis, Wildbounds).
 **Learning**: Built a 7-step fallback ladder into <private> skill — brand site → Google snippet → camelcamelcamel → keepa → third-party retailer → brand direct → snippet-only. Also added verified-prices gate: spec-lock cannot run without data/verified-prices.json.
+
 

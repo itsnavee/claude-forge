@@ -35,7 +35,7 @@
 
 ## Banned Automations
 
-**X/Twitter fetching is banned.** Prior use of `twitter-cli` got the X account suspended. Never run `twitter-cli`, `fxtwitter`, `nitter`, `vxtwitter`, `snscrape`, WebFetch-against-x.com, or any automation — first-party or third-party — that reads `x.com` / `twitter.com` / `t.co`. No fallback is acceptable. If the user shares an X link, ask them to paste the <item> text. GitHub and general web article fetching remain allowed. Enforced by `hooks/block-x-automation.sh`.
+**X/Twitter fetching is banned.** Prior use of `twitter-cli` got the X account suspended. Never run `twitter-cli`, `fxtwitter`, `nitter`, `vxtwitter`, `snscrape`, WebFetch-against-x.com, or any automation — first-party or third-party — that reads `x.com` / `twitter.com` / `t.co`. No fallback is acceptable. If the user shares an X link, ask them to paste the tweet text. GitHub and general web article fetching remain allowed. Enforced by `hooks/block-x-automation.sh`.
 
 @ROUTING.md
 
@@ -76,6 +76,23 @@ These rules apply to ALL coding work. They are non-negotiable.
 - Do not praise your own output. Focus on what's missing, untested, or assumed.
 - When reviewing code you previously generated, apply the same skepticism as reviewing a stranger's code.
 - Never use your own output as evidence of quality. "The architecture is sound" means nothing without a benchmark or proof.
+
+### Finish What You Start — No Laziness, No Deferrals
+- When asked to complete a task, **complete it**. Do not stop halfway, do not leave TODOs for the user, do not return control with "you could also…" when the ask was to do it.
+- **Always find answers to your own open questions** via web research, reading docs, reading the codebase, or running commands. Do not hand a list of unanswered questions back to the user.
+- **Exception — human-in-the-loop required:** if a question genuinely requires the user's credentials, business judgment, or access you don't have, append it to `<project_root>/todo/manual-tasks.md` with context and move on. Create the `todo/` folder if missing. Never block a deliverable on a question you could have answered yourself.
+- Deferring work is acceptable only when explicitly scoped out by the user or when it blocks on human input per above. "I'll note this as an open question" is not an acceptable substitute for doing the research.
+
+### Simple > Over-Engineered > Broken
+- **Simple working beats over-engineered unfinished.** Every time. A 10-line solution that works is better than a 100-line architecture that doesn't.
+- If a task can be done correctly in 10 lines without compromising quality, **do not write 50 or 100**. Line count inflation is a signal you're solving a problem the user didn't have.
+- Do not implement unmaintainable code — no clever one-liners, no magic numbers without names, no patterns the next reader won't understand in 30 seconds.
+- Trade-off discipline: when a short solution genuinely compromises correctness, security, or clarity, state the trade-off explicitly and ask. Do not silently bloat the solution to dodge the trade-off.
+
+### No Cheap Fixes Unless Explicitly Asked
+- **Do not suggest or implement cheap fixes** (quick patches, band-aids, "minimal change" paths) unless the user has explicitly asked for one.
+- Default to the correct fix: root-cause analysis, proper abstraction, full solution — scoped appropriately per the "simple > over-engineered" rule above.
+- If you identify a cheap fix as an option, mention it once, labeled as such, and proceed with the real fix unless told otherwise.
 
 ---
 

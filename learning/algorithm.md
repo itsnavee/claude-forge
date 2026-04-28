@@ -16,10 +16,14 @@ Wrong approaches, over-engineering, missed requirements, process mistakes.
 
 
 
+
+
 ### 2026-03-18 — Cost optimizations at zero scale save zero dollars
 **Project**: my-project
 **Context**: Vetted 17 improvement candidates. 8 were cost optimization items (Moonshine STT, Telnyx migration, OTEL tracking, etc.) proposed before having any customers.
 **Learning**: At 0 customers, cost optimization is pure waste. Deepgram at 100 onboardings = $0.22/month — the Docker sidecar RAM costs more. Defer cost work until reaching specific revenue triggers ($500/month Twilio, 20+ tenants for observability).
+
+
 
 
 
@@ -43,6 +47,7 @@ Wrong approaches, over-engineering, missed requirements, process mistakes.
 
 
 
+
 ### 2026-03-21 — loop continuity
 **Project**: my-project
 **Context**: User pointed out I was stopping every 3-5 tasks to output summaries and wait for "continue"
@@ -55,10 +60,13 @@ Wrong approaches, over-engineering, missed requirements, process mistakes.
 
 
 
+
+
 ### 2026-03-21 — CF Tunnel beats Hetzner LB for zero-inbound VPS
 **Project**: my-project
 **Context**: Evaluated Hetzner LB vs CF LB for production. Hetzner LB requires VPS on private network but Hetzner has no managed NAT gateway — VPS can't make outbound API calls without a public IP or extra NAT VPS.
 **Learning**: CF Tunnel (free) + CF LB ($5/mo) is better: tunnel creates outbound-only connection, VPS keeps public IP but firewalls ALL inbound. Result: zero open ports + full outbound connectivity. Hetzner LB adds complexity for no security benefit.
+
 
 
 
@@ -98,6 +106,7 @@ Wrong approaches, over-engineering, missed requirements, process mistakes.
 
 
 
+
 ### 2026-04-14 — Alibaba prices are not factory cost
 **Project**: my-project (<private> skill)
 **Context**: Built Variant A/B pricing stacks using $7-12 USD FOB floor derived from Alibaba listings. User pushed back: real Pakistan factory ex-factory is 1,000-1,500 PKR (~$3.50-5.50 USD), roughly half the Alibaba quote. Had to rewrite the pricing stack files 4 times as user corrected each assumption.
@@ -109,4 +118,5 @@ Wrong approaches, over-engineering, missed requirements, process mistakes.
 **Project**: my-project (<private> skill)
 **Context**: Built initial spec-lock with "30% post-PPC margin" as the primary evaluation metric. User asked for ROI on capital deployed instead. Switching lenses dramatically changed the framing: 178% ROI per 6-month cycle at £1,096 capital beats a 30% margin comparison.
 **Learning**: For <private> products, always evaluate at MOQ-level capital deployment + ROI with sell-through sensitivity tables, NOT just margin %. Margin % alone is misleading (30% on £5 needs 100x scale; 20% on £45 is meaningful per unit). Codified in <private> skill as required output in every spec-lock.
+
 
