@@ -337,12 +337,12 @@
     "ralph-loop@claude-plugins-official": true,
     "feature-dev@claude-plugins-official": true
   },
-  "effortLevel": "high",
+  "effortLevel": "low",
   "voice": {
     "enabled": true,
     "mode": "hold"
   },
   "skipDangerousModePermissionPrompt": true,
-  "voiceEnabled": true,
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "voiceEnabled": true
 }

@@ -17,9 +17,11 @@
 
 
 
+
 ### 2026-03-15 — 84a53e40 — 7/10
 **Project**: my-project | **Task**: Create task lists, research payments, set up context files
 **Rating reason**: Productive session — organized all project work into done/todo/backlog, made a clear payment processor decision, and set up project-level CLAUDE.md
+
 
 
 
@@ -46,9 +48,11 @@
 
 
 
+
 ### 2026-03-18 — a436acf6 — 9/10
 **Project**: my-project | **Task**: Vet improvements, implement accepted items, adopt quota patterns
 **Rating reason**: Exceptionally productive — vetted 17 improvements with honest verdicts, implemented 6 in parallel via subagents, adopted best patterns from 3 projects into quota system
+
 
 
 
@@ -74,9 +78,11 @@
 
 
 
+
 ### 2026-03-20 — 8f4e163f — 7/10
 **Project**: my-project | **Task**: Update todo, create test plan, begin test loop
 **Rating reason**: Productive — cleaned up stale docs, created comprehensive 77-task test plan, starting structured execution loop
+
 
 
 
@@ -100,6 +106,7 @@
 
 
 
+
 ### 2026-03-21 — 89cc0191 — 9/10
 **Project**: my-project | **Task**: Global dctl, 77-task test loop, prod infra design
 **Rating reason**: Exceptionally productive — refactored dctl across 3 projects, completed full test suite, designed production architecture with CF LB + Tunnel + Tailscale
@@ -111,9 +118,11 @@
 
 
 
+
 ### 2026-03-23 — 49b5b59c — 7/10
 **Project**: my-project | **Task**: Docs reorg, backlog planning, ASMR competitive analysis
 **Rating reason**: Productive session — reorganized docs, vetted 20+ improvement suggestions, analyzed key competitor intel, but tweet fetching blocked by missing auth tokens
+
 
 
 
@@ -139,9 +148,11 @@
 
 
 
+
 ### 2026-03-27 — c291bd40 — 7/10
 **Project**: kubernetes-labs | **Task**: KVM cluster setup for CKA prep
 **Rating reason**: Productive session — built full VM lifecycle script, hit cloud-init auth issues but debugged and resolved. Two recreate cycles due to auth bugs.
+
 
 
 
@@ -163,6 +174,7 @@
 
 
 
+
 ### 2026-03-28 — 44c470f0 — 8/10
 **Project**: my-project | **Task**: Competitor deep-dives + strategic Q&A + market corrections
 **Rating reason**: High-value strategic session — 3 parallel competitor deep-dives, corrected market positioning, clarified build-vs-buy decisions, updated multiple files across my-project + my-project. Good use of background agents.
@@ -175,9 +187,11 @@
 
 
 
+
 ### 2026-04-01 — f874b952 — 8/10
-**Project**: my-project/<private> | **Task**: <private> plugin build + browser automation MCP setup
+**Project**: my-project/fba | **Task**: <private> plugin build + browser automation MCP setup
 **Rating reason**: Very productive session — built the full <private> plugin, researched H10/JS patterns, integrated ImportYeti, installed two MCP browser servers, all in one sitting
+
 
 
 
@@ -189,9 +203,11 @@
 
 
 
+
 ### 2026-04-02 — 985e174f — 9/10
-**Project**: my-project/<private> | **Task**: <private> plugin acceptance criteria + sleep bonnet full pipeline
+**Project**: my-project/fba | **Task**: <private> plugin acceptance criteria + sleep bonnet full pipeline
 **Rating reason**: Exceptional session — fixed MCP crash, created 48 acceptance criteria, updated strategy + SKILL.md, ran full 5-phase pipeline on real product (sleep bonnet), went from 65% to 86% criteria passing, produced actionable supplier inquiries for both Alibaba and Pakistan sourcing.
+
 
 
 
@@ -203,15 +219,18 @@
 
 
 
+
 ### 2026-04-14 — 4f157fd9 — 9/10
 **Project**: my-project | **Task**: <private> leather wallet full pipeline + skill overhaul + B2B pivot
 **Rating reason**: Very productive — full discover→prep pipeline on 2 variants, 4 pricing methodology corrections from user integrated into skill, 40 B2B targets scouted, 15 suppliers scouted, outreach templates drafted. User pushed back constructively on assumptions (Alibaba inflation, soft costs, retail pricing) which led to skill improvements that generalize beyond this project.
 
 
 
+
 ### 2026-03-28 — b9a9d3c0 — 9/10
 **Project**: my-project | **Task**: Phonely deep-dive + Telnyx/Twilio partner analysis + docs restructure
 **Rating reason**: Massive research session — 11 parallel sub-agents across 3 analyses, 21 new files, docs restructured (competitor vs partner), combined summaries created. Efficient parallel execution with good quality output.
+
 
 
 
@@ -223,10 +242,32 @@
 
 
 
+
 ### 2026-04-02 — 814ed3ac — 4/10
 **Project**: my-project | **Task**: Save & git sync
 **Rating reason**: Housekeeping session — committed prior work, consolidated sessions. Trivial.
 
 
 
+
+
+
+### 2026-05-29 — 25fa9260 — 8/10
+**Project**: yumeloom | **Task**: Port .pen design to Next.js + heavy UI iteration
+**Rating reason**: Very productive full-site build with tight feedback loops and verified-by-screenshot fixes; minor churn on the star-rating bug (three tries) and one reverted change.
+
+
+### 2026-06-18 — e47545ee — 9/10
+**Project**: my-project | **Task**: Plan Scout architecture + infrastructure
+**Rating reason**: Productive deep planning session — locked stack, containers, ports, security, backups with clear reasoning and good user pushback/iteration; no code yet so not a 10.
+
+
+### 2026-06-21 — 532f94b4 — 8/10
+**Project**: my-project | **Task**: direction decision (scout vs voice-AI) + positioning/pricing/GTM
+**Rating reason**: Tight critical analysis grounded in live market checks; user moved from indecision to a locked direction + pricing + recorded decision doc.
+
+
+### 2026-06-21 — 8872a338 — 6/10
+**Project**: my-project | **Task**: save & sync checkpoint
+**Rating reason**: Routine checkpoint; no new work, but confirmed prior docs committed/pushed and carried forward the PRD-reconciliation open item.
 

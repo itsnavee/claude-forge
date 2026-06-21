@@ -26,7 +26,7 @@ fi
 
 # Skip for repos that don't need session summaries
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null)
-if [ "$REPO_NAME" = "claude-config" ] || [ "$REPO_NAME" = "my-project" ]; then
+if [ "$REPO_NAME" = "claude-config" ] || [ "$REPO_NAME" = "my-project" ] || [ "$REPO_NAME" = "network-automation" ]; then
   exit 0
 fi
 
