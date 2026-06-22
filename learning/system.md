@@ -18,10 +18,12 @@ Infrastructure, tooling, environment, and config issues.
 
 
 
+
 ### 2026-03-14 — session-start hook injecting 80 lines of context silently
 **Project**: claude-config
 **Context**: Token usage spiked after adding state.md/architecture.md pattern. Investigation found session-start hook was injecting last 80 lines of session summary into every new session, plus CLAUDE.md was loaded twice in claude-config repo.
 **Learning**: Audit hook output sizes periodically. Changed to opt-in model — hook reports availability, user runs /my-catchup when needed.
+
 
 
 
@@ -50,10 +52,15 @@ Infrastructure, tooling, environment, and config issues.
 
 
 
+
+
 ### 2026-03-27 — cloud-init plain_text_passwd broken on Ubuntu Noble
 **Project**: kubernetes-labs
 **Context**: Setting up KVM VMs with cloud-init user-data, password auth failed despite correct config
 **Learning**: On newer cloud-init (25.x), use `passwd` with a hashed value from `openssl passwd -6` plus `chpasswd: expire: false`. `plain_text_passwd` is unreliable.
+
+
+
 
 
 
@@ -76,10 +83,13 @@ Infrastructure, tooling, environment, and config issues.
 
 
 
+
+
 ### 2026-04-02 — browser-use MCP crashes entire Claude session with invalid schema
 **Project**: my-project/<private>
 **Context**: browser-use MCP tool schemas had oneOf/allOf/anyOf at top level, which Claude API rejects. Once the tool definition loaded, ALL requests failed — not just browser calls.
 **Learning**: MCP servers with invalid tool schemas crash the entire session. Test each MCP server in isolation after installing. The error "tools.N.custom.input_schema: does not support oneOf" means remove that MCP immediately. Playwright MCP is the replacement.
+
 
 
 
@@ -95,11 +105,30 @@ Infrastructure, tooling, environment, and config issues.
 
 
 
+
+
 ### 2026-04-14 — Amazon UK direct WebFetch returns HTTP 500/503 consistently
 **Project**: my-project (<private> skill)
 **Context**: Multiple sub-agents tried to fetch amazon.co.uk/dp/<ASIN> pages during deep-dive + price verification runs. 100% returned HTTP 500 or 503. CamelCamelCamel and Keepa both 403. Only reliable sources: brand direct sites, Google AI summaries (snippets), third-party retailers (John Lewis, Wildbounds).
 **Learning**: Built a 7-step fallback ladder into <private> skill — brand site → Google snippet → camelcamelcamel → keepa → third-party retailer → brand direct → snippet-only. Also added verified-prices gate: spec-lock cannot run without data/verified-prices.json.
 
+
+
+
+
+
+### 2026-05-29 — rtk truncates curl output; verify with node fetch
+**Project**: yumeloom
+**Context**: `curl ... > file` repeatedly produced exactly ~201 bytes, looking like a broken/aborted page. It was the `rtk` proxy truncating curl output, not a real error — the page was healthy (chunked 200).
+**Learning**: To inspect a local server's full HTML, use `node -e "fetch(url).then(r=>r.text())..."` instead of curl — rtk doesn't truncate node. Headless Playwright (via npx-cached module path) works for screenshots/measurements.
+
+
+
+
+### 2026-06-22 — App Store name checks: use WebSearch, not curl/WebFetch
+**Project**: hara
+**Context**: Checking App Store name collisions for "Yume"/"Hara". Direct `curl` to itunes.apple.com returned HTTP 000; WebFetch to both the iTunes Search API and apps.apple.com failed (ECONNREFUSED / 404 on JS-rendered HTML).
+**Learning**: For App Store name-conflict checks in this env, the iTunes Search API and apps.apple.com HTML are unreachable from shell/WebFetch. Use the WebSearch tool with `"name" app App Store <category>` — it surfaced the Yumie/Yumio/Yumme collision that killed the Yume name.
 
 
 
@@ -110,10 +139,12 @@ Infrastructure, tooling, environment, and config issues.
 
 
 
+
 ### 2026-05-24 — `doppler run -- python` fails; use `.venv/bin/uvicorn` directly
 **Project**: my-project
 **Context**: Tried `doppler run -- python -m uvicorn app.main:app` to inject secrets at boot. Failed: `Doppler Error: exec: "python": executable file not found in $PATH`. doppler run forks a subprocess that doesn't inherit the venv's $PATH.
 **Learning**: When running a venv-installed tool under `doppler run`, invoke it via its full path: `doppler run -- .venv/bin/<binary>`. Or `doppler run -- bash -c 'source .venv/bin/activate && <cmd>'`.
+
 
 
 
@@ -122,12 +153,6 @@ Infrastructure, tooling, environment, and config issues.
 **Context**: Doppler stg DATABASE_URL is `postgresql://...@speak-postgres:5432/...` — valid inside the docker-compose network, but host-side uvicorn boots fail with `gaierror: Name or service not known`.
 **Learning**: For dual-context apps (host dev + docker-compose), either keep two DATABASE_URLs (one per Doppler config) or add host-side override at boot. Avoid hardcoding the Docker network hostname in the prd/stg config unless that config is *only* consumed from inside Docker.
 
-
-
-### 2026-05-29 — rtk truncates curl output; verify with node fetch
-**Project**: yumeloom
-**Context**: `curl ... > file` repeatedly produced exactly ~201 bytes, looking like a broken/aborted page. It was the `rtk` proxy truncating curl output, not a real error — the page was healthy (chunked 200).
-**Learning**: To inspect a local server's full HTML, use `node -e "fetch(url).then(r=>r.text())..."` instead of curl — rtk doesn't truncate node. Headless Playwright (via npx-cached module path) works for screenshots/measurements.
 
 
 
