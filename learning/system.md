@@ -17,10 +17,12 @@ Infrastructure, tooling, environment, and config issues.
 
 
 
+
 ### 2026-03-14 — session-start hook injecting 80 lines of context silently
 **Project**: claude-config
 **Context**: Token usage spiked after adding state.md/architecture.md pattern. Investigation found session-start hook was injecting last 80 lines of session summary into every new session, plus CLAUDE.md was loaded twice in claude-config repo.
 **Learning**: Audit hook output sizes periodically. Changed to opt-in model — hook reports availability, user runs /my-catchup when needed.
+
 
 
 
@@ -61,7 +63,6 @@ Infrastructure, tooling, environment, and config issues.
 
 
 
-
 ### 2026-03-27 — sudo changes $HOME, breaks relative paths in scripts
 **Project**: kubernetes-labs
 **Context**: SSH key path used `$HOME/.ssh/...` but script runs via `sudo`, so `$HOME` became `/root`
@@ -76,9 +77,10 @@ Infrastructure, tooling, environment, and config issues.
 
 
 ### 2026-04-02 — browser-use MCP crashes entire Claude session with invalid schema
-**Project**: my-project/fba
+**Project**: my-project/<private>
 **Context**: browser-use MCP tool schemas had oneOf/allOf/anyOf at top level, which Claude API rejects. Once the tool definition loaded, ALL requests failed — not just browser calls.
 **Learning**: MCP servers with invalid tool schemas crash the entire session. Test each MCP server in isolation after installing. The error "tools.N.custom.input_schema: does not support oneOf" means remove that MCP immediately. Playwright MCP is the replacement.
+
 
 
 
@@ -101,8 +103,36 @@ Infrastructure, tooling, environment, and config issues.
 
 
 
+### 2026-05-24 — `psql` not installed on host; use `docker exec speak-postgres-dev psql` instead
+**Project**: my-project
+**Context**: tried `PGPASSWORD=... /usr/bin/psql -h localhost -p 7432 ...` to verify migrations; failed because psql isn't on the host.
+**Learning**: when validating DB state in a containerized dev setup, route through the postgres container: `docker exec <pg-container> psql -U <user> -d <db> -c "..."`. No PGPASSWORD needed inside the container.
+
+
+
+### 2026-05-24 — `doppler run -- python` fails; use `.venv/bin/uvicorn` directly
+**Project**: my-project
+**Context**: Tried `doppler run -- python -m uvicorn app.main:app` to inject secrets at boot. Failed: `Doppler Error: exec: "python": executable file not found in $PATH`. doppler run forks a subprocess that doesn't inherit the venv's $PATH.
+**Learning**: When running a venv-installed tool under `doppler run`, invoke it via its full path: `doppler run -- .venv/bin/<binary>`. Or `doppler run -- bash -c 'source .venv/bin/activate && <cmd>'`.
+
+
+
+### 2026-05-24 — Docker-network hostnames don't resolve from host (DATABASE_URL=speak-postgres:5432)
+**Project**: my-project
+**Context**: Doppler stg DATABASE_URL is `postgresql://...@speak-postgres:5432/...` — valid inside the docker-compose network, but host-side uvicorn boots fail with `gaierror: Name or service not known`.
+**Learning**: For dual-context apps (host dev + docker-compose), either keep two DATABASE_URLs (one per Doppler config) or add host-side override at boot. Avoid hardcoding the Docker network hostname in the prd/stg config unless that config is *only* consumed from inside Docker.
+
+
+
 ### 2026-05-29 — rtk truncates curl output; verify with node fetch
 **Project**: yumeloom
 **Context**: `curl ... > file` repeatedly produced exactly ~201 bytes, looking like a broken/aborted page. It was the `rtk` proxy truncating curl output, not a real error — the page was healthy (chunked 200).
 **Learning**: To inspect a local server's full HTML, use `node -e "fetch(url).then(r=>r.text())..."` instead of curl — rtk doesn't truncate node. Headless Playwright (via npx-cached module path) works for screenshots/measurements.
+
+
+
+### 2026-06-21 — yt-dlp beats WebFetch for YouTube research
+**Project**: my-project
+**Context**: my-rate-app-idea skill notes "YouTube direct-fetch returns footer junk." WebFetch on @starterstory confirmed it. Installed yt-dlp via `uv tool install yt-dlp` (pip --user is blocked on this box).
+**Learning**: For any YouTube-sourced research, pull the transcript: `yt-dlp --write-auto-subs --sub-lang en --skip-download --sub-format vtt`, strip VTT timestamps/dupes to plain text, feed the file path to sub-agents. No rate-limiting observed at ~5 videos. Far better than the skill's "search secondary coverage" fallback.
 

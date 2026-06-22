@@ -44,7 +44,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - **Private repos** (`IS_PUBLIC_REPO=no`):
 ```
 Co-Authored-By: naveed.ahmed <5332157+youruser@users.noreply.github.com>
-Co-Authored-By: example.com <247807559+example-admin@users.noreply.github.com>
+Co-Authored-By: example.com <247807559+privatepk-admin@users.noreply.github.com>
 ```
 
 Use a HEREDOC for the message (example for private repo):
@@ -53,7 +53,7 @@ git commit -m "$(cat <<'EOF'
 message here
 
 Co-Authored-By: naveed.ahmed <5332157+youruser@users.noreply.github.com>
-Co-Authored-By: example.com <247807559+example-admin@users.noreply.github.com>
+Co-Authored-By: example.com <247807559+privatepk-admin@users.noreply.github.com>
 EOF
 )"
 ```
